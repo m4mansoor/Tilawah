@@ -22,6 +22,11 @@ following notices (include these in the app's "About / Licenses" screen).
 - **License:** MIT (code) / Apache-2.0 (model weights)
 - **Source:** https://github.com/openai/whisper
 
+## Quran text (reference data)
+- **Text:** Tanzil / AlQuran.cloud `quran-simple` (imla'i script)
+- **License:** Public domain (the Quran text itself); Tanzil's text is freely distributable
+- **Source:** https://api.alquran.cloud/v1/quran/quran-simple · https://tanzil.net
+
 ---
 
 ### License obligations (summary)
