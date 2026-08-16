@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import logging
 import os
+import subprocess
 import uuid
 from contextlib import asynccontextmanager
 
@@ -86,21 +87,42 @@ def me(user: User = Depends(get_current_user)):
 
 
 def _audio_to_file(req: CorrectionRequest) -> str:
-    """Write the request audio to a local temp file and return its path."""
+    """Save the request audio and convert it to 16 kHz mono WAV via ffmpeg.
+
+    Browsers record WebM/Opus (MediaRecorder), which the ASR model can't always
+    decode reliably. Converting to a standard WAV makes transcription robust.
+    """
     os.makedirs(settings.tmp_dir, exist_ok=True)
-    path = os.path.join(settings.tmp_dir, f"{uuid.uuid4().hex}.wav")
+    raw_path = os.path.join(settings.tmp_dir, f"{uuid.uuid4().hex}.raw")
+    wav_path = os.path.join(settings.tmp_dir, f"{uuid.uuid4().hex}.wav")
 
     if req.audio_base64:
-        with open(path, "wb") as f:
+        with open(raw_path, "wb") as f:
             f.write(base64.b64decode(req.audio_base64))
-        return path
-
-    if req.audio_url:
+    elif req.audio_url:
         # Wired in the platform phase: audio stored on the VPS's local disk
         # (served by the API), referenced by URL.
         raise HTTPException(status_code=501, detail="audio_url download not yet wired")
+    else:
+        raise HTTPException(status_code=400, detail="Provide audio_base64 or audio_url")
 
-    raise HTTPException(status_code=400, detail="Provide audio_base64 or audio_url")
+    try:
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", raw_path, "-ar", "16000", "-ac", "1", wav_path],
+            check=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Audio decoding failed: {exc.stderr.decode(errors='ignore')[:200]}",
+        )
+    finally:
+        try:
+            os.remove(raw_path)
+        except OSError:
+            pass
+    return wav_path
 
 
 @app.post("/v1/correct", response_model=CorrectionResponse)
@@ -114,6 +136,10 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
             os.remove(audio_path)
         except OSError:
             pass
+
+    logger.info(
+        "Transcript (%d words): %r", len(transcript.split()), transcript[:200]
+    )
 
     # Resolve the reference ayah (by explicit id/surah, else fuzzy-match).
     reference = None
