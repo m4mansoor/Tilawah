@@ -8,7 +8,7 @@ services:
     ports:
       - "8010:8000"          # local dev; on the VPS, Caddy is the public entry
     environment:
-      MODEL_ID: ${MODEL_ID:-tarteel-ai/whisper-base-ar-quran}
+      MODEL_ID: ${MODEL_ID:-MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix}
       DEVICE: ${DEVICE:--1}
       REDIS_URL: redis://redis:6379/0
       DATABASE_URL: postgresql://tilawah:${POSTGRES_PASSWORD:-tilawah}@db:5432/tilawah

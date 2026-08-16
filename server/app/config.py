@@ -15,9 +15,9 @@ class Settings(BaseSettings):
 
     # ASR model. Swap this to upgrade without any infrastructure change.
     # All options are Apache-2.0 and ungated (no permission required):
-    #   tarteel-ai/whisper-base-ar-quran                          (74M)
-    #   MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix (809M)
-    model_id: str = "tarteel-ai/whisper-base-ar-quran"
+    #   tarteel-ai/whisper-base-ar-quran                          (74M, fastest, least accurate)
+    #   MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix (809M, accurate)
+    model_id: str = "MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix"
 
     # -1 = CPU, 0 = first GPU, 1 = second GPU, ...
     device: int = -1
