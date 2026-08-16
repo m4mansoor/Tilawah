@@ -64,8 +64,9 @@ export default function App() {
 
   if (view === "loading") {
     return (
-      <main className="wrap">
-        <p className="center">Loading…</p>
+      <main className="wrap narrow">
+        <div className="spinner" />
+        <p className="center">Preparing Tilawah…</p>
       </main>
     );
   }
@@ -344,6 +345,8 @@ function HomeView(props: {
           )}
         </div>
       </section>
+
+      <footer className="footer">Tilawah · Recite for the Ummah</footer>
     </main>
   );
 }

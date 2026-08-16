@@ -27,6 +27,11 @@ following notices (include these in the app's "About / Licenses" screen).
 - **License:** Public domain (the Quran text itself); Tanzil's text is freely distributable
 - **Source:** https://api.alquran.cloud/v1/quran/quran-simple · https://tanzil.net
 
+## Al Qalam Quran Majeed (Arabic display font)
+- **Type:** TrueType font (Al Majeed Quranic Font)
+- **Source:** https://urdunigaar.com/download/al-qalam-quran-majeed-font-ttf-file-free-download/
+- **Usage:** Quranic Arabic rendering in the web dashboard (verse text, Bismillah, transcripts)
+
 ---
 
 ### License obligations (summary)

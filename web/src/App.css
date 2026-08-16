@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "Al Qalam Quran Majeed";
+  src: url("/fonts/AlQalamQuranMajeed.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   --bg: #f7f3e9;
   --card: #ffffff;
@@ -106,9 +113,9 @@ body::before {
 }
 
 .bismillah {
-  font-family: "Amiri", serif;
+  font-family: "Al Qalam Quran Majeed", "Amiri", serif;
   color: var(--green-dark);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   margin: 0 0 8px;
   direction: rtl;
 }
@@ -290,7 +297,10 @@ button {
 
 .stat {
   text-align: center;
-  padding: 8px;
+  padding: 14px 8px;
+  background: linear-gradient(180deg, #fdfbf4, #f7f3e7);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 .stat-value {
@@ -372,8 +382,9 @@ button {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-family: "Amiri", serif;
-  font-size: 1.05rem;
+  font-family: "Al Qalam Quran Majeed", "Amiri", serif;
+  font-size: 1.1rem;
+  line-height: 2;
 }
 
 .search {
@@ -388,13 +399,31 @@ button {
 }
 
 /* Recite view */
+.verse {
+  border-top: 3px solid var(--gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.verse::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at top right, rgba(201, 162, 39, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
 .verse-text {
-  font-family: "Amiri", serif;
-  font-size: 2rem;
+  font-family: "Al Qalam Quran Majeed", "Amiri", serif;
+  font-size: 2.15rem;
   direction: rtl;
   text-align: right;
-  line-height: 2.1;
+  line-height: 2.2;
   margin: 14px 0 0;
+  padding: 4px 6px 10px;
 }
 
 .controls {
@@ -501,8 +530,9 @@ button {
   direction: rtl;
   text-align: right;
   margin: 6px 0 12px;
-  font-family: "Amiri", serif;
-  font-size: 1.05rem;
+  font-family: "Al Qalam Quran Majeed", "Amiri", serif;
+  font-size: 1.15rem;
+  line-height: 2;
 }
 
 .review-row audio {
@@ -561,4 +591,40 @@ button {
   background: #fdf0ee;
   color: var(--red);
 }
+
+/* Footer */
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.footer::before {
+  content: "◆";
+  display: block;
+  color: var(--gold);
+  font-size: 0.6rem;
+  margin-bottom: 8px;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 46px;
+  height: 46px;
+  margin: 60px auto 16px;
+  border: 4px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
