@@ -5,26 +5,74 @@ import base64
 import logging
 import os
 import uuid
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
 
 from .asr import transcribe
+from .auth import get_current_user
 from .config import settings
+from .db import Base, engine, get_db
+from .models import User  # noqa: F401  (registers table metadata)
 from .quran_data import all_ayahs, get_ayah, get_ayah_by_id
-from .schemas import CorrectionRequest, CorrectionResponse
+from .schemas import (
+    CorrectionRequest,
+    CorrectionResponse,
+    LoginRequest,
+    Token,
+    UserCreate,
+    UserOut,
+)
+from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
 from .verse_match import find_best_ayah
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.app_name, version=settings.version)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan)
 
 
 @app.get("/health")
 def health() -> dict:
     """Liveness/readiness probe. Does NOT load the model (keeps startup fast)."""
     return {"status": "ok", "app": settings.app_name, "model": settings.model_id}
+
+
+@app.post("/v1/auth/register", response_model=Token, status_code=201)
+def register(req: UserCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == req.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    user = User(
+        email=req.email,
+        name=req.name,
+        password_hash=hash_password(req.password),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return Token(access_token=create_access_token(user.email))
+
+
+@app.post("/v1/auth/login", response_model=Token)
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user or not verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    return Token(access_token=create_access_token(user.email))
+
+
+@app.get("/v1/auth/me", response_model=UserOut)
+def me(user: User = Depends(get_current_user)):
+    return user
 
 
 def _audio_to_file(req: CorrectionRequest) -> str:

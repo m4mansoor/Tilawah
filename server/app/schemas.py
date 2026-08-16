@@ -5,7 +5,7 @@ scenes can change without breaking clients.
 """
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CorrectionRequest(BaseModel):
@@ -42,3 +42,30 @@ class CorrectionResponse(BaseModel):
     ayah_id: int | None = None
     matched_ayah_text: str | None = None
     errors: list[WordError] = []
+
+
+# --- Auth ---
+
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    name: str | None = None
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    name: str | None = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

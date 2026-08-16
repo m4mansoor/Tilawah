@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     database_url: str = "postgresql://tilawah:tilawah@localhost:5432/tilawah"
 
+    # Auth
+    jwt_secret: str = "dev-secret-change-me"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
+
     # Max audio length accepted per correction request (seconds).
     max_audio_seconds: int = 300
 
