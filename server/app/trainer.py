@@ -175,7 +175,7 @@ def next_verse(
 
     if best is None:
         raise HTTPException(
-            status_code=404, detail="You've recited every verse — thank you!"
+            status_code=404, detail="You've recited every verse - thank you!"
         )
 
     return VerseOut(

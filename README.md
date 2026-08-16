@@ -1,7 +1,7 @@
-# Tilawah (تِلاوَة) — AI Quran Recitation Corrector
+# Tilawah (تِلاوَة) - AI Quran Recitation Corrector
 
 Tilawah listens to Quran recitation, recognizes the words, and points out
-recitation and Tajweed mistakes — word by word — so anyone can recite with confidence.
+recitation and Tajweed mistakes - word by word - so anyone can recite with confidence.
 
 > **Working title:** Tilawah (Arabic تِلاوَة, "recitation"). Started as "Quran Corrector".
 
@@ -14,8 +14,8 @@ recitation and Tajweed mistakes — word by word — so anyone can recite with c
 ## Architecture (production-ready)
 See [`docs/architecture.md`](docs/architecture.md) for the full design.
 
-- **Clients:** Tauri v2 (desktop + mobile) + Web platform — all share one API.
-- **App tier:** FastAPI (containerized) — orchestration, verse matching, tajweed diff.
+- **Clients:** Tauri v2 (desktop + mobile) + Web platform - all share one API.
+- **App tier:** FastAPI (containerized) - orchestration, verse matching, tajweed diff.
 - **ASR:** Whisper fine-tuned on Quran recitation (MaddoggProduction large-v3-turbo Quran LoRA, converted to CTranslate2 int8).
 - **Queue/cache:** Redis (Streams + pub/sub).
 - **Data:** PostgreSQL (self-hosted) + audio files on local NVMe disk.
@@ -39,7 +39,7 @@ tilawah/
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── scripts/convert_model.sh
-├── web/             # Qari web dashboard (Vite + React) — served by Caddy
+├── web/             # Qari web dashboard (Vite + React) - served by Caddy
 ├── apps/
 │   └── desktop/     # Tauri v2 app (React + TS) → Windows/macOS/Android/iOS
 ├── docs/
@@ -95,13 +95,13 @@ Trainer-platform endpoints (Qari data collection):
 `web/` is a Qari dashboard: a Qari registers, consents, then gets assigned (or picks)
 a verse, recites it, and submits the audio. Submissions are auto-transcribed and scored
 against the reference; an admin (see `ADMIN_EMAILS`) approves/rejects them. Approved
-recordings become training data — the goal is 5 distinct Qaris per verse across the
+recordings become training data - the goal is 5 distinct Qaris per verse across the
 whole Quran before fine-tuning Whisper. Recordings are private (each Qari sees only
 their own); only aggregate counts are shared.
 
 Two frontends share one API:
-- `web/` — the Qari dashboard, served by Caddy at `tilawah.me`.
-- `apps/desktop` — the Tauri correction app (desktop/mobile).
+- `web/` - the Qari dashboard, served by Caddy at `tilawah.me`.
+- `apps/desktop` - the Tauri correction app (desktop/mobile).
 
 ## Tauri app (Windows / macOS / Android / iOS)
 
@@ -129,6 +129,6 @@ docker compose up -d --build   # builds API + web dashboard; Caddy serves HTTPS
 ```
 
 ## Model & licensing
-- **ASR model:** `MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix` — Apache-2.0, converted to CTranslate2 int8 (`quran-ct2`).
+- **ASR model:** `MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix` - Apache-2.0, converted to CTranslate2 int8 (`quran-ct2`).
 - **Reference text:** Tanzil Quran (public domain), shipped as `server/app/data/quran.json`.
 - See [`docs/NOTICES.md`](docs/NOTICES.md) for the required attribution.

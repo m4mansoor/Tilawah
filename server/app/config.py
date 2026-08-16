@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     version: str = "0.1.0"
 
     # ASR model (faster-whisper / CTranslate2). Options:
-    #   "/root/.cache/huggingface/quran-ct2" — Quran-fine-tuned (accurate) [default]
-    #   "large-v3-turbo" — 809M vanilla, good but not Quran-tuned
-    #   "base"           — 74M, fastest, least accurate
+    #   "/root/.cache/huggingface/quran-ct2" - Quran-fine-tuned (accurate) [default]
+    #   "large-v3-turbo" - 809M vanilla, good but not Quran-tuned
+    #   "base"           - 74M, fastest, least accurate
     model_id: str = "/root/.cache/huggingface/quran-ct2"
 
     # -1 = CPU, 0 = first GPU, 1 = second GPU, ...

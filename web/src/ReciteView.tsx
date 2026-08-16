@@ -87,13 +87,13 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
           {busy && <p className="muted">Transcribing &amp; checking…</p>}
         </div>
       ) : (
-        <div className="card">
-          <h2>Submitted — thank you! 🎉</h2>
-          <p className="muted">Status: <b>{result.status}</b></p>
+        <div className="card success-card">
+          <div className="success-mark">✓</div>
+          <h2>JazakAllah khair!</h2>
+          <p className="muted">Your recitation was submitted and is pending review.</p>
           <p className="muted">
-            Match score: <b>{result.match_score != null ? Math.round(result.match_score * 100) + "%" : "—"}</b>
+            Match score: <b>{result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}</b>
           </p>
-          <p className="muted">Heard: {result.transcript || "(empty)"}</p>
           <button className="primary" onClick={onDone}>Done</button>
         </div>
       )}
@@ -218,7 +218,7 @@ export function MyView({ onBack }: { onBack: () => void }) {
             <span className="badge">{r.surah}:{r.ayah}</span>
             <span className="muted">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}</span>
             <span className={`status status-${r.status}`}>{r.status}</span>
-            <span className="muted">{r.match_score != null ? Math.round(r.match_score * 100) + "%" : "—"}</span>
+            <span className="muted">{r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}</span>
           </li>
         ))}
       </ul>

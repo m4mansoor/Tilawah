@@ -1,4 +1,4 @@
-# Tilawah correction engine — CPU image (deployable on Hostinger KVM4).
+# Tilawah correction engine - CPU image (deployable on Hostinger KVM4).
 # For a GPU worker, set DEVICE=0 and run this on a GPU host (serverless or dedicated).
 FROM python:3.11-slim
 

@@ -1,4 +1,4 @@
-"""Unit tests for security primitives (password hashing + JWT) — no DB needed."""
+"""Unit tests for security primitives (password hashing + JWT) - no DB needed."""
 import os
 import sys
 import unittest

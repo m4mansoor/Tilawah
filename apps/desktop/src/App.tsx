@@ -152,7 +152,7 @@ function App() {
         <h1>Tilawah</h1>
         <div className="arabic">تِلاوَة</div>
         <p className="tagline">
-          Recite. Get corrected. Perfect your Quran recitation — word by word.
+          Recite. Get corrected. Perfect your Quran recitation - word by word.
         </p>
       </header>
 
@@ -190,7 +190,7 @@ function App() {
           <div className="teaching" key={teachingIndex}>
             <p className="teaching-arabic">{teaching.arabic}</p>
             <p className="teaching-text">“{teaching.text}”</p>
-            <p className="teaching-source">— {teaching.source}</p>
+            <p className="teaching-source">- {teaching.source}</p>
           </div>
         </section>
       )}
@@ -215,7 +215,7 @@ function App() {
           {result.note && <p className="note">{result.note}</p>}
 
           {result.errors.length === 0 ? (
-            <p className="ok">✅ Masha'Allah — no mistakes detected.</p>
+            <p className="ok">✅ Masha'Allah - no mistakes detected.</p>
           ) : (
             <>
               <h3>Corrections ({result.errors.length})</h3>

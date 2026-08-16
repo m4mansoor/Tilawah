@@ -82,7 +82,7 @@ function ReviewRow({
       <div className="review-head">
         <span className="badge">{r.surah}:{r.ayah}</span>
         <span className="muted">
-          #{r.id} · score {r.match_score != null ? Math.round(r.match_score * 100) + "%" : "—"}
+          #{r.id} · score {r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}
         </span>
       </div>
       <p className="muted transcript">Heard: {r.transcript || "(empty)"}</p>

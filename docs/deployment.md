@@ -35,13 +35,13 @@ curl https://tilawah.me/health
 # => {"status":"ok","app":"Tilawah","model":"/root/.cache/huggingface/quran-ct2"}
 ```
 
-- The **Qari dashboard** is served at `https://tilawah.me` — Qaris register there.
+- The **Qari dashboard** is served at `https://tilawah.me` - Qaris register there.
 - Emails listed in `ADMIN_EMAILS` get the admin review panel (approve/reject
   submitted recitations).
 - Recordings are stored in the `tilawah-audio` volume (16 kHz mono WAV).
 
 The first `/v1/correct` call downloads the Whisper model (~1.5 GB) into the
-`tilawah-models` volume — it is cached thereafter.
+`tilawah-models` volume - it is cached thereafter.
 
 ## Model setup (one-time, for best accuracy)
 
@@ -57,9 +57,9 @@ If this step is skipped, the engine falls back to the vanilla `large-v3-turbo`
 model (still good, but not Quran-tuned).
 
 ## Ports & services
-- **80/443** — Caddy (public HTTPS). Only these should be open in the VPS firewall.
-- **8010** — API (local/debug only; keep closed to the internet).
-- **5432 / 6379** — PostgreSQL / Redis (internal only, not exposed).
+- **80/443** - Caddy (public HTTPS). Only these should be open in the VPS firewall.
+- **8010** - API (local/debug only; keep closed to the internet).
+- **5432 / 6379** - PostgreSQL / Redis (internal only, not exposed).
 
 ## Updates
 ```bash
@@ -67,7 +67,7 @@ git pull
 docker compose up -d --build
 ```
 
-## Backups (nightly Postgres dump — add to cron)
+## Backups (nightly Postgres dump - add to cron)
 ```bash
 docker compose exec db pg_dump -U tilawah tilawah > backup-$(date +%F).sql
 ```

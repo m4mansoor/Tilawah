@@ -73,7 +73,7 @@ class TestPhoneticMatching(unittest.TestCase):
         self.assertEqual(diff_words(reference, recognized), [])
 
     def test_still_detects_distant_class_substitution(self):
-        # ح (guttural) vs خ (uvular) is a real makhraj error — must be flagged.
+        # ح (guttural) vs خ (uvular) is a real makhraj error - must be flagged.
         errors = diff_words("الحمد لله", "الخمد لله")
         types = [e["error_type"] for e in errors]
         self.assertIn("substitution", types)

@@ -18,7 +18,7 @@ from .models import User
 
 logger = logging.getLogger(__name__)
 
-# (table, column DDL) — applied in order; idempotent on PostgreSQL.
+# (table, column DDL) - applied in order; idempotent on PostgreSQL.
 _MIGRATIONS: list[tuple[str, str]] = [
     ("users", "ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'qari'"),
     ("users", "ADD COLUMN IF NOT EXISTS qiraah VARCHAR(20) DEFAULT 'hafs'"),

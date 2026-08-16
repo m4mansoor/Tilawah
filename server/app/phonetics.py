@@ -1,6 +1,6 @@
 """Phonetic (makharij al-huruf) model for tolerant Arabic matching.
 
-Whisper — even the Quran-tuned model — routinely confuses letters that share or
+Whisper - even the Quran-tuned model - routinely confuses letters that share or
 neighbour an articulation point (makhraj) during recitation: ق/ك, ح/ه, ن/ل,
 س/ص, ت/ط, etc. A naive letter-for-letter diff therefore flags correctly-recited
 verses as wrong.

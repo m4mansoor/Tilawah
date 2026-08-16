@@ -1,7 +1,7 @@
-# Tilawah — Architecture
+# Tilawah - Architecture
 
 Production-ready design. Every component is containerized, and the GPU layer is
-serverless, so scaling is a configuration change — never a rewrite.
+serverless, so scaling is a configuration change - never a rewrite.
 
 ## Overview
 
@@ -29,7 +29,7 @@ serverless, so scaling is a configuration change — never a rewrite.
                          └─────────────────┬─────────────────┘
                                            │
                          ┌─────────────────▼─────────────────┐
-                         │  ASR Worker — SERVERLESS GPU       │
+                         │  ASR Worker - SERVERLESS GPU       │
                          │  faster-whisper (CTranslate2, int8)│
                          │  whisper-large-v3-turbo Quran LoRA │
                          └───────────────────────────────────┘
@@ -42,19 +42,19 @@ Obs:   Grafana Cloud (metrics/logs) · Sentry (errors)
 
 | Layer | Decision | Rationale |
 |---|---|---|
-| Edge | Caddy (auto-HTTPS) on the VPS | Free TLS via Let's Encrypt; domain A record → VPS IP — no third party needed |
-| Backend | Python **FastAPI** | Same language as ML stack — no boundary friction |
-| App tier | Docker (OCI) containers | Runs on 1 VPS today or Kubernetes tomorrow — migration is config, not rewrite |
+| Edge | Caddy (auto-HTTPS) on the VPS | Free TLS via Let's Encrypt; domain A record → VPS IP - no third party needed |
+| Backend | Python **FastAPI** | Same language as ML stack - no boundary friction |
+| App tier | Docker (OCI) containers | Runs on 1 VPS today or Kubernetes tomorrow - migration is config, not rewrite |
 | ASR inference | **faster-whisper** (CTranslate2, int8) | ~4x faster, ~2x less memory than HF transformers |
 | GPU execution | **Serverless GPU** (Modal / RunPod Serverless) | Scales to zero when idle; autoscales under load |
 | Model | `whisper-large-v3-turbo` + Quran LoRA (Apache-2.0) | Best open Quran ASR; worker is model-agnostic |
 | Queue | **Redis Streams** | Decouples ingestion from GPU; doubles as cache + rate-limit + pub/sub |
-| Database | **PostgreSQL** (self-hosted) | Own the data — runs in a container on KVM4 with backups |
+| Database | **PostgreSQL** (self-hosted) | Own the data - runs in a container on KVM4 with backups |
 | Auth | FastAPI JWT (self-managed) | One auth for web + Tauri + mobile; no third-party dependency |
 | Audio storage | Local NVMe disk (200 GB on KVM4) | Simplest & cheapest; holds tens of thousands of recordings |
 | Realtime results | Redis pub/sub -> WebSocket | Push corrections to clients as they finish |
 | Observability | Grafana Cloud + Sentry | Managed, free tier |
-| CI/CD | **GitHub Actions** | Builds every app binary + Docker images on GitHub-hosted runners — no physical machines; GitOps-ready |
+| CI/CD | **GitHub Actions** | Builds every app binary + Docker images on GitHub-hosted runners - no physical machines; GitOps-ready |
 | IaC | Terraform / Pulumi | Reproducible infra-as-code from day 1 |
 
 ## Model serving contract (stable)
@@ -66,11 +66,11 @@ audio bytes + ayah_id
 
 The model behind this contract can be upgraded freely.
 
-## Build & Release — 100% CI, no physical machines
+## Build & Release - 100% CI, no physical machines
 
 Every release binary for every platform is produced by **GitHub Actions**
-(GitHub-hosted runners) with **Tauri v2**. No local machine — and no physical
-Mac or other hardware — is ever used to build or sign. A developer only pushes a
+(GitHub-hosted runners) with **Tauri v2**. No local machine - and no physical
+Mac or other hardware - is ever used to build or sign. A developer only pushes a
 `v*` tag (or runs the workflow manually).
 
 | Target | GitHub runner | Output |
@@ -96,7 +96,7 @@ Mac or other hardware — is ever used to build or sign. A developer only pushes
 KVM4 = 4 vCPU AMD EPYC · 16 GB RAM · 200 GB NVMe · 16 TB bandwidth.
 
 The KVM4 VPS runs **only the server** (API + Redis + Postgres). App binaries are
-built in GitHub Actions — never on the VPS or any local machine.
+built in GitHub Actions - never on the VPS or any local machine.
 
 1. Install Docker + Docker Compose on the VPS.
 2. `git clone <repo> && docker compose up -d --build`
@@ -111,7 +111,7 @@ built in GitHub Actions — never on the VPS or any local machine.
 
 ### Scaling path (additive, no re-architecture)
 - **Higher accuracy / throughput:** point the ASR worker at a serverless GPU
-  (Modal / RunPod) running the 809M turbo Quran model — same API contract.
+  (Modal / RunPod) running the 809M turbo Quran model - same API contract.
 - **More concurrent users:** add app-tier replicas behind a load balancer.
 - **Live streaming mode:** add always-warm GPU pods.
 

@@ -1,6 +1,6 @@
 """Word-level correction: diff the recognized transcript against the reference ayah.
 
-Words are aligned by their *phonetic key* (makharij al-huruf classes — see
+Words are aligned by their *phonetic key* (makharij al-huruf classes - see
 phonetics.py) so ASR letter confusions (ق/ك, ح/ه, ن/ل, ...) don't produce false
 "substitution" errors on correctly-recited text. Genuine mistakes between distant
 articulation classes still surface as errors.

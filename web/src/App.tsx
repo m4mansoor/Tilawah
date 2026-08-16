@@ -149,8 +149,13 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
 
   return (
     <main className="wrap narrow">
-      <h1 className="brand">تِلاوَة</h1>
-      <p className="tagline">Qari Recitation — help build the Tilawah model.</p>
+      <div className="hero">
+        <div className="brand-calligraphy">تِلاوَة</div>
+        <div className="brand-latin">Tilawah</div>
+        <div className="ornament">◆</div>
+        <div className="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <p className="tagline">Recite for the Ummah. Help build the Quran model.</p>
+      </div>
       <form onSubmit={submit} className="card">
         {mode === "register" && (
           <label>
@@ -247,8 +252,8 @@ function OnboardingView({
           <select value={ageRange} onChange={(e) => setAgeRange(e.target.value)}>
             <option value="">Prefer not to say</option>
             <option value="under18">Under 18</option>
-            <option value="18-30">18–30</option>
-            <option value="31-50">31–50</option>
+            <option value="18-30">18-30</option>
+            <option value="31-50">31-50</option>
             <option value="51+">51+</option>
           </select>
         </label>

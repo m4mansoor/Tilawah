@@ -1,4 +1,4 @@
-# Tilawah — Caddy reverse proxy (automatic HTTPS via Let's Encrypt).
+# Tilawah - Caddy reverse proxy (automatic HTTPS via Let's Encrypt).
 # Serves the Qari web dashboard and proxies /v1, /health and /docs to the API.
 
 tilawah.me {

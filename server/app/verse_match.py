@@ -1,7 +1,7 @@
 """Fuzzy verse matching: map a recognized transcript to the intended ayah.
 
 Arabic is normalized by removing diacritics and unifying letter variants, then
-candidates are scored by sequence similarity — with a phonetic-class fallback so
+candidates are scored by sequence similarity - with a phonetic-class fallback so
 ASR letter confusions (ق/ك, ح/ه, ن/ل, ...) don't prevent a correct match. Used
 as a fallback to locate the ayah when the user did not select one explicitly.
 """
@@ -82,7 +82,7 @@ def find_best_ayah(transcript: str, ayahs: list[dict]) -> dict | None:
 
 
 def find_best_reference(transcript: str, ayahs: list[dict]) -> dict | None:
-    """Return the best-matching reference — a single ayah or a full surah.
+    """Return the best-matching reference - a single ayah or a full surah.
 
     Users may recite one verse or a whole surah, so we compare the transcript
     against individual ayahs *and* each surah's concatenated text.

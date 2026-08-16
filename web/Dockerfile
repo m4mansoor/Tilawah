@@ -1,4 +1,4 @@
-# Tilawah Qari web dashboard — multi-stage build, served by nginx.
+# Tilawah Qari web dashboard - multi-stage build, served by nginx.
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json ./
