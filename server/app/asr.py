@@ -22,16 +22,26 @@ def get_model():
     if _model is None:
         with _lock:
             if _model is None:
+                import os
+
                 from faster_whisper import WhisperModel
 
                 device = "cpu" if settings.device < 0 else "cuda"
+                model_path = settings.model_id
+                # Fall back to vanilla turbo if the converted model isn't present.
+                if model_path.startswith("/") and not os.path.isdir(model_path):
+                    logger.warning(
+                        "Converted model %s not found; falling back to large-v3-turbo",
+                        model_path,
+                    )
+                    model_path = "large-v3-turbo"
                 logger.info(
                     "Loading ASR model %s (device=%s, int8)",
-                    settings.model_id,
+                    model_path,
                     device,
                 )
                 _model = WhisperModel(
-                    settings.model_id,
+                    model_path,
                     device=device,
                     compute_type="int8",
                 )
