@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { Coverage, QariProfile, Verse } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
+import { Crescent, Mosque } from "./Art";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
 
@@ -151,6 +152,7 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
   return (
     <main className="wrap narrow">
       <div className="hero">
+        <Crescent size={64} className="crescent-center" />
         <div className="brand-calligraphy">تِلاوَة</div>
         <div className="brand-latin">Tilawah</div>
         <div className="ornament">◆</div>
@@ -183,6 +185,7 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
           {mode === "login" ? "Create an account" : "Log in"}
         </button>
       </p>
+      <Mosque className="mosque" />
     </main>
   );
 }
@@ -276,6 +279,7 @@ function OnboardingView({
           {busy ? "Saving…" : "Start reciting"}
         </button>
       </form>
+      <Mosque className="mosque" />
     </main>
   );
 }
@@ -309,6 +313,7 @@ function HomeView(props: {
   return (
     <main className="wrap">
       <header className="topbar">
+        <Crescent size={30} />
         <h1 className="brand">تِلاوَة</h1>
         <div className="spacer" />
         <span className="muted">{profile.name || profile.email}</span>
@@ -347,6 +352,7 @@ function HomeView(props: {
       </section>
 
       <footer className="footer">Tilawah · Recite for the Ummah</footer>
+      <Mosque className="mosque" />
     </main>
   );
 }
