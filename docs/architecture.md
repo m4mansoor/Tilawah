@@ -53,7 +53,7 @@ Obs:   Grafana Cloud (metrics/logs) · Sentry (errors)
 | Audio storage | Cloudflare R2 (S3-compatible) | Zero egress fees (audio is egress-heavy) |
 | Realtime results | Redis pub/sub -> WebSocket | Push corrections to clients as they finish |
 | Observability | Grafana Cloud + Sentry | Managed, free tier |
-| CI/CD | GitHub Actions -> GHCR | GitOps-ready (ArgoCD/Flux if/when K8s) |
+| CI/CD | **GitHub Actions** | Builds every app binary + Docker images on GitHub-hosted runners — no physical machines; GitOps-ready |
 | IaC | Terraform / Pulumi | Reproducible infra-as-code from day 1 |
 
 ## Model serving contract (stable)
@@ -65,9 +65,37 @@ audio bytes + ayah_id
 
 The model behind this contract can be upgraded freely.
 
+## Build & Release — 100% CI, no physical machines
+
+Every release binary for every platform is produced by **GitHub Actions**
+(GitHub-hosted runners) with **Tauri v2**. No local machine — and no physical
+Mac or other hardware — is ever used to build or sign. A developer only pushes a
+`v*` tag (or runs the workflow manually).
+
+| Target | GitHub runner | Output |
+|---|---|---|
+| Windows desktop | `windows-latest` | `.msi` / `.exe` |
+| macOS desktop (Intel) | `macos-latest` | `.app` / `.dmg` |
+| macOS desktop (Apple Silicon) | `macos-latest` | `.app` / `.dmg` (arm64) |
+| Android | `ubuntu-latest` | `.apk` / `.aab` |
+| iOS | `macos-latest` (Xcode) | `.ipa` |
+
+- **Trigger:** push a `v*` tag, or `workflow_dispatch`.
+- **Signing keys live only in CI:** code-signing certificates, Apple credentials,
+  and the Android keystore are stored as **GitHub encrypted secrets** and applied
+  inside the runners. Keys never leave GitHub.
+- **macOS & iOS** build on Apple's `macos-latest` cloud runner (Xcode
+  preinstalled), so a physical Mac is **not** required.
+- **Artifacts** are attached to the GitHub Release automatically.
+- The generated `src-tauri/gen/android` and `src-tauri/gen/ios` projects are
+  committed to keep builds reproducible.
+
 ## Deployment on Hostinger KVM4 (CPU-only)
 
 KVM4 = 4 vCPU AMD EPYC · 16 GB RAM · 200 GB NVMe · 16 TB bandwidth.
+
+The KVM4 VPS runs **only the server** (API + Redis + Postgres). App binaries are
+built in GitHub Actions — never on the VPS or any local machine.
 
 1. Install Docker + Docker Compose on the VPS.
 2. `git clone <repo> && docker compose up -d --build`
