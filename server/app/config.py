@@ -13,11 +13,11 @@ class Settings(BaseSettings):
     app_name: str = "Tilawah"
     version: str = "0.1.0"
 
-    # ASR model. Swap this to upgrade without any infrastructure change.
-    # All options are Apache-2.0 and ungated (no permission required):
-    #   tarteel-ai/whisper-base-ar-quran                          (74M, fastest, least accurate)
-    #   MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix (809M, accurate)
-    model_id: str = "MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix"
+    # ASR model (faster-whisper / CTranslate2). Options:
+    #   "large-v3-turbo" — 809M, accurate, fast (int8) [default]
+    #   "base"           — 74M, fastest, least accurate
+    #   (or a Hugging Face CTranslate2 repo / local path)
+    model_id: str = "large-v3-turbo"
 
     # -1 = CPU, 0 = first GPU, 1 = second GPU, ...
     device: int = -1

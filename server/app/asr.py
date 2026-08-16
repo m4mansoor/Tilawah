@@ -1,8 +1,7 @@
-"""ASR engine — a thin, model-agnostic wrapper around Hugging Face Whisper.
+"""ASR engine using faster-whisper (CTranslate2) for fast CPU inference.
 
-The model is loaded lazily (thread-safe) so the API boots fast and stays
-responsive while the model warms up. To upgrade the model, change
-`settings.model_id` — no code or infrastructure change.
+faster-whisper is ~4x faster than the stock transformers pipeline on CPU and
+uses int8 quantization, which is the production-standard approach for Whisper.
 """
 from __future__ import annotations
 
@@ -13,45 +12,44 @@ from .config import settings
 
 logger = logging.getLogger(__name__)
 
-_pipe = None
+_model = None
 _lock = threading.Lock()
 
 
-def get_pipe():
-    """Return a lazily-initialized ASR pipeline (thread-safe)."""
-    global _pipe
-    if _pipe is None:
+def get_model():
+    """Return a lazily-initialized faster-whisper model (thread-safe)."""
+    global _model
+    if _model is None:
         with _lock:
-            if _pipe is None:
-                from transformers import pipeline
+            if _model is None:
+                from faster_whisper import WhisperModel
 
+                device = "cpu" if settings.device < 0 else "cuda"
                 logger.info(
-                    "Loading ASR model %s (device=%s)", settings.model_id, settings.device
+                    "Loading ASR model %s (device=%s, int8)",
+                    settings.model_id,
+                    device,
                 )
-                _pipe = pipeline(
-                    "automatic-speech-recognition",
-                    model=settings.model_id,
-                    device=settings.device,
+                _model = WhisperModel(
+                    settings.model_id,
+                    device=device,
+                    compute_type="int8",
                 )
                 logger.info("ASR model ready")
-    return _pipe
+    return _model
 
 
 def transcribe(audio_path: str) -> str:
-    """Transcribe an audio file to (diacritized) Arabic text.
-
-    Note: the Tarteel Whisper model's generation config predates the
-    `language`/`task` generation arguments, so we rely on auto-detection
-    (the model is fine-tuned on Arabic only, so it reliably emits Arabic).
-    """
-    pipe = get_pipe()
-    # Bound generation length: short verses need far fewer than the 448-token
-    # default, which also keeps CPU inference fast.
-    result = pipe(audio_path, generate_kwargs={"max_new_tokens": 225})
-    return result["text"].strip()
+    """Transcribe an audio file to Arabic text."""
+    model = get_model()
+    segments, _info = model.transcribe(audio_path, language="ar", beam_size=5)
+    text = " ".join(seg.text.strip() for seg in segments)
+    return text.strip()
 
 
 def transcribe_with_timestamps(audio_path: str):
-    """Transcribe returning word-level timestamps (used for highlighting)."""
-    pipe = get_pipe()
-    return pipe(audio_path, return_timestamps="word")
+    """Transcribe returning word-level segments (used for highlighting)."""
+    model = get_model()
+    segments, _info = model.transcribe(audio_path, language="ar", beam_size=5)
+    return list(segments)
+
