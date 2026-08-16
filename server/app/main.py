@@ -96,7 +96,8 @@ def _audio_to_file(req: CorrectionRequest) -> str:
         return path
 
     if req.audio_url:
-        # Wired in the platform phase: presigned object-storage download (R2).
+        # Wired in the platform phase: audio stored on the VPS's local disk
+        # (served by the API), referenced by URL.
         raise HTTPException(status_code=501, detail="audio_url download not yet wired")
 
     raise HTTPException(status_code=400, detail="Provide audio_base64 or audio_url")

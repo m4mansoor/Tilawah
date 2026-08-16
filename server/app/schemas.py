@@ -16,8 +16,8 @@ class CorrectionRequest(BaseModel):
     surah: int | None = Field(default=None, ge=1, le=114)
     ayah: int | None = Field(default=None, ge=1)
 
-    # Audio: base64 is the simplest for the scaffold; presigned object-storage
-    # URLs (R2) replace this in the platform phase.
+    # Audio: base64 is the simplest for the scaffold. In the platform phase,
+    # audio is uploaded to the VPS's local disk and referenced by URL.
     audio_base64: str | None = None
     audio_url: str | None = None
 
