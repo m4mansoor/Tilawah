@@ -627,22 +627,80 @@ button {
   }
 }
 
-/* Islamic art */
-.mosque {
-  display: block;
+/* Hero image banner (auth / onboarding) */
+.auth-hero {
+  position: relative;
   width: 100%;
-  margin-top: 30px;
+  height: 250px;
+  overflow: hidden;
 }
 
-.mosque svg {
-  display: block;
+.auth-hero-img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.crescent-center {
+.auth-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(8, 40, 31, 0.45) 0%, rgba(8, 40, 31, 0.78) 100%);
+  text-align: center;
+}
+
+.brand-calligraphy.light {
+  background: linear-gradient(135deg, #ffffff 0%, #f2e3b3 55%, #c9a227 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-latin.light {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bismillah.light {
+  color: #f2e3b3;
+}
+
+/* Home banner */
+.home-banner {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.home-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  margin: 0 auto 10px;
+}
+
+.home-banner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(8, 40, 31, 0) 0%, rgba(8, 40, 31, 0.72) 100%);
+}
+
+.home-greeting {
+  color: #fff;
+  font-family: "Amiri", "Al Qalam Quran Majeed", serif;
+  font-size: 1.4rem;
 }
 
 

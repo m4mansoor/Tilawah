@@ -32,6 +32,10 @@ following notices (include these in the app's "About / Licenses" screen).
 - **Source:** https://urdunigaar.com/download/al-qalam-quran-majeed-font-ttf-file-free-download/
 - **Usage:** Quranic Arabic rendering in the web dashboard (verse text, Bismillah, transcripts)
 
+## Images (Wikimedia Commons)
+- **Masjid an-Nabawi (Prophet's Mosque), Madina** by Muhammad Mahdi Karim, licensed GFDL 1.2. Source: https://commons.wikimedia.org/wiki/File:Masjid_Nabawi_The_Prophet%27s_Mosque%2C_Madina.jpg
+- **Sultan Ahmed Mosque (Blue Mosque), Istanbul** by Pedro Szekely, licensed CC BY-SA 2.0. Source: https://commons.wikimedia.org/wiki/File:Istanbul_%2834223582516%29_%28cropped%29.jpg
+
 ---
 
 ### License obligations (summary)

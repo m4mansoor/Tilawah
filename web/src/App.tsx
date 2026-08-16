@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { Coverage, QariProfile, Verse } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
-import { Crescent, Mosque } from "./Art";
+import { Crescent, HeroBanner } from "./Art";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
 
@@ -150,16 +150,11 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
   }
 
   return (
-    <main className="wrap narrow">
-      <div className="hero">
-        <Crescent size={64} className="crescent-center" />
-        <div className="brand-calligraphy">تِلاوَة</div>
-        <div className="brand-latin">Tilawah</div>
-        <div className="ornament">◆</div>
-        <div className="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    <>
+      <HeroBanner />
+      <main className="wrap narrow">
         <p className="tagline">Recite for the Ummah. Help build the Quran model.</p>
-      </div>
-      <form onSubmit={submit} className="card">
+        <form onSubmit={submit} className="card">
         {mode === "register" && (
           <label>
             Name
@@ -185,8 +180,8 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
           {mode === "login" ? "Create an account" : "Log in"}
         </button>
       </p>
-      <Mosque className="mosque" />
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -231,10 +226,12 @@ function OnboardingView({
   }
 
   return (
-    <main className="wrap narrow">
-      <h1>Welcome, {profile.name || profile.email}</h1>
-      <p className="tagline">A few details before you start reciting.</p>
-      <form onSubmit={submit} className="card">
+    <>
+      <HeroBanner />
+      <main className="wrap narrow">
+        <h1>Welcome, {profile.name || profile.email}</h1>
+        <p className="tagline">A few details before you start reciting.</p>
+        <form onSubmit={submit} className="card">
         <label>
           Name
           <input value={name} onChange={(e) => setName(e.target.value)} />
@@ -279,8 +276,8 @@ function OnboardingView({
           {busy ? "Saving…" : "Start reciting"}
         </button>
       </form>
-      <Mosque className="mosque" />
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -320,6 +317,13 @@ function HomeView(props: {
         <button className="link" onClick={onLogout}>Log out</button>
       </header>
 
+      <section className="home-banner">
+        <img src="/img/blue-mosque.jpg" alt="" />
+        <div className="home-banner-overlay">
+          <div className="home-greeting">Assalamu Alaikum, {profile.name || "Qari"}</div>
+        </div>
+      </section>
+
       {coverage && (
         <section className="card">
           <h2>Collection progress</h2>
@@ -352,7 +356,6 @@ function HomeView(props: {
       </section>
 
       <footer className="footer">Tilawah · Recite for the Ummah</footer>
-      <Mosque className="mosque" />
     </main>
   );
 }
