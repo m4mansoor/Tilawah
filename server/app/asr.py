@@ -45,7 +45,9 @@ def transcribe(audio_path: str) -> str:
     (the model is fine-tuned on Arabic only, so it reliably emits Arabic).
     """
     pipe = get_pipe()
-    result = pipe(audio_path)
+    # Bound generation length: short verses need far fewer than the 448-token
+    # default, which also keeps CPU inference fast.
+    result = pipe(audio_path, generate_kwargs={"max_new_tokens": 225})
     return result["text"].strip()
 
 

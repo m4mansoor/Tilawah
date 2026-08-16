@@ -23,6 +23,7 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
+  min-height: 100vh;
 }
 
 .header {
@@ -46,9 +47,17 @@ body {
   color: #5b6b66;
 }
 
+/* Controls / record button */
 .controls {
   text-align: center;
   margin: 1.5rem 0;
+}
+
+.recording-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 .record {
@@ -59,11 +68,15 @@ body {
   background: #0d7a6a;
   color: #fff;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .record:hover {
   background: #0a6557;
+}
+
+.record:active {
+  transform: scale(0.97);
 }
 
 .record.stop {
@@ -79,9 +92,153 @@ body {
   color: #5b6b66;
 }
 
-.error {
-  color: #b3403a;
+/* Pulsing mic while recording */
+.mic-pulse {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: #0d7a6a;
+  color: #fff;
+  animation: pulse 1.6s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 122, 106, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 26px rgba(13, 122, 106, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 122, 106, 0);
+  }
+}
+
+/* Analyzing state */
+.analyzing {
   text-align: center;
+  padding: 1.5rem 0;
+}
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 4px solid #e0e7e4;
+  border-top-color: #0d7a6a;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.elapsed {
+  color: #8a9892;
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+}
+
+/* Teaching card (rotates while analyzing) */
+.teaching {
+  background: #fff;
+  border: 1px solid #e6ded0;
+  border-left: 4px solid #c9a24b;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 0 auto;
+  max-width: 560px;
+  animation: fadeIn 0.6s ease;
+}
+
+.teaching-arabic {
+  font-size: 1.5rem;
+  direction: rtl;
+  color: #123c33;
+  margin: 0 0 0.5rem;
+}
+
+.teaching-text {
+  font-style: italic;
+  color: #41514b;
+  margin: 0 0 0.25rem;
+}
+
+.teaching-source {
+  color: #8a9892;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Result state */
+.result {
+  background: #fff;
+  border: 1px solid #e6ded0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  text-align: center;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.checkmark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: #0d7a6a;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.4) 0.15s both;
+}
+
+@keyframes checkPop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.transcript {
+  font-size: 1.3rem;
+  color: #123c33;
+  direction: rtl;
+  text-align: right;
+  margin: 0.5rem 0 1rem;
 }
 
 .ok {
@@ -89,28 +246,14 @@ body {
   font-weight: 600;
 }
 
-.result {
-  background: #fff;
-  border: 1px solid #e6ded0;
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.transcript {
-  font-size: 1.25rem;
-  color: #123c33;
-  direction: rtl;
-  text-align: right;
-}
-
 .errors {
   list-style: none;
   padding: 0;
+  text-align: left;
 }
 
 .errors li {
-  padding: 0.4rem 0;
+  padding: 0.45rem 0;
   border-bottom: 1px solid #f0e9dc;
 }
 
@@ -131,5 +274,30 @@ body {
 
 b {
   margin: 0 0.25rem;
+}
+
+.error {
+  color: #b3403a;
+  text-align: center;
+}
+
+.again {
+  margin-top: 1rem;
+  font-size: 1rem;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: #0d7a6a;
+  color: #fff;
+  cursor: pointer;
+}
+
+.again:hover {
+  background: #0a6557;
+}
+
+h2,
+h3 {
+  margin: 0.5rem 0;
 }
 
