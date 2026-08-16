@@ -5,6 +5,9 @@ scenes can change without breaking clients.
 """
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -70,3 +73,86 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+# --- Trainer platform (Qari data collection) ---
+
+
+class QariProfileUpdate(BaseModel):
+    name: str | None = None
+    qiraah: str = "hafs"
+    gender: str | None = None
+    age_range: str | None = None
+    tajweed_level: str | None = None
+    consent_ok: bool = False
+
+
+class QariProfileOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    name: str | None = None
+    role: str
+    qiraah: str
+    gender: str | None = None
+    age_range: str | None = None
+    tajweed_level: str | None = None
+    consent_ok: bool
+
+
+class SurahOut(BaseModel):
+    number: int
+    name: str
+    english_name: str
+    ayah_count: int
+
+
+class VerseOut(BaseModel):
+    surah: int
+    ayah: int
+    text: str
+    sample_count: int = 0
+
+
+class RecitationSubmit(BaseModel):
+    surah: int = Field(ge=1, le=114)
+    ayah: int = Field(ge=1)
+    audio_base64: str
+
+
+class RecitationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    user_id: int | None = None
+    surah: int | None = None
+    ayah: int | None = None
+    transcript: str = ""
+    match_score: float | None = None
+    duration_s: float | None = None
+    status: str = "pending"
+    review_note: str | None = None
+    created_at: datetime | None = None
+
+
+class ReviewRequest(BaseModel):
+    status: Literal["approved", "rejected"]
+    note: str | None = None
+
+
+class SurahCoverageOut(BaseModel):
+    surah: int
+    name: str
+    approved: int
+    covered: int
+    total: int
+
+
+class CoverageOut(BaseModel):
+    total_ayahs: int
+    approved_samples: int
+    covered_ayahs: int
+    complete_ayahs: int
+    target_per_ayah: int = 5
+    by_surah: list[SurahCoverageOut]

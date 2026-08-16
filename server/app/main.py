@@ -16,6 +16,7 @@ from .asr import transcribe
 from .auth import get_current_user
 from .config import settings
 from .db import Base, engine, get_db
+from .migrate import run_migrations, seed_admin_users
 from .models import User  # noqa: F401  (registers table metadata)
 from .quran_data import all_ayahs, get_ayah, get_ayah_by_id
 from .schemas import (
@@ -28,6 +29,7 @@ from .schemas import (
 )
 from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
+from .trainer import router as trainer_router
 from .verse_match import find_best_reference
 
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +39,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    run_migrations()
+    seed_admin_users()
     yield
 
 
@@ -50,6 +54,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(trainer_router)
 
 
 @app.get("/health")

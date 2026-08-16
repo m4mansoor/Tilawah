@@ -1,0 +1,414 @@
+:root {
+  --bg: #f6f5f1;
+  --card: #ffffff;
+  --ink: #1c2a20;
+  --muted: #6b736d;
+  --green: #0f7d5b;
+  --green-dark: #0a5d44;
+  --gold: #c9a227;
+  --red: #c0392b;
+  --border: #e6e2d8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.narrow {
+  max-width: 440px;
+}
+
+.center {
+  text-align: center;
+  color: var(--muted);
+}
+
+.brand {
+  color: var(--green);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.tagline {
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.topbar h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+form label {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+form input,
+form select {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+form input:disabled {
+  background: #f0eee9;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.check input {
+  width: auto;
+  margin-top: 3px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: var(--green-dark);
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.big {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.15rem;
+  margin-bottom: 14px;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--green);
+  font-weight: 600;
+  padding: 0;
+}
+
+.error {
+  color: var(--red);
+  font-size: 0.9rem;
+  background: #fdf0ee;
+  border: 1px solid #f2c9c4;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.actions {
+  margin-top: 6px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.action {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  padding: 18px 10px;
+}
+
+.action:hover {
+  border-color: var(--green);
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.bar {
+  height: 10px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.list-row:hover {
+  border-color: var(--green);
+}
+
+.list-row.static {
+  cursor: default;
+}
+
+.list-row.static:hover {
+  border-color: var(--border);
+}
+
+.badge {
+  background: #eef4f0;
+  color: var(--green-dark);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.ayah-preview {
+  flex: 1;
+  direction: rtl;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.search {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+
+.verse-text {
+  font-size: 1.6rem;
+  direction: rtl;
+  text-align: right;
+  line-height: 2;
+  margin: 12px 0 0;
+}
+
+.controls {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.record {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.record.stop {
+  background: var(--red);
+}
+
+.mic-pulse {
+  font-size: 3rem;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+.hint {
+  color: var(--muted);
+}
+
+.seg {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.seg button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.seg .seg-active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.review-row {
+  display: block;
+}
+
+.review-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.transcript {
+  direction: rtl;
+  text-align: right;
+  margin: 6px 0 10px;
+}
+
+.review-row audio {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.approve,
+.reject {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.approve {
+  background: var(--green);
+}
+
+.reject {
+  background: var(--red);
+}
+
+.approve:disabled,
+.reject:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.status-approved {
+  background: #e6f4ec;
+  color: var(--green-dark);
+}
+
+.status-pending {
+  background: #f7f1e0;
+  color: #8a6d1a;
+}
+
+.status-rejected {
+  background: #fdf0ee;
+  color: var(--red);
+}

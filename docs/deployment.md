@@ -20,22 +20,27 @@ curl -fsSL https://get.docker.com | sh
 git clone https://github.com/m4mansoor/Tilawah.git
 cd Tilawah
 cp .env.example .env
-nano .env        # set a strong POSTGRES_PASSWORD and JWT_SECRET
+nano .env        # set POSTGRES_PASSWORD, JWT_SECRET, and ADMIN_EMAILS (your email)
 ```
 
 ## 4. Launch
 ```bash
 docker compose up -d --build
-docker compose ps    # verify api / db / redis / caddy are all Up
+docker compose ps    # verify api / web / db / redis / caddy are all Up
 ```
 
 ## 5. Verify
 ```bash
 curl https://tilawah.me/health
-# => {"status":"ok","app":"Tilawah","model":"tarteel-ai/whisper-base-ar-quran"}
+# => {"status":"ok","app":"Tilawah","model":"/root/.cache/huggingface/quran-ct2"}
 ```
 
-The first `/v1/correct` call downloads the Whisper model (~300 MB) into the
+- The **Qari dashboard** is served at `https://tilawah.me` — Qaris register there.
+- Emails listed in `ADMIN_EMAILS` get the admin review panel (approve/reject
+  submitted recitations).
+- Recordings are stored in the `tilawah-audio` volume (16 kHz mono WAV).
+
+The first `/v1/correct` call downloads the Whisper model (~1.5 GB) into the
 `tilawah-models` volume — it is cached thereafter.
 
 ## Model setup (one-time, for best accuracy)

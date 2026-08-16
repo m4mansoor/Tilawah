@@ -58,3 +58,30 @@ def get_ayah(surah: int, ayah: int) -> dict | None:
 def all_ayahs() -> list[dict]:
     """Return all ayahs (for fuzzy matching)."""
     return load_quran()
+
+
+_surahs: list[dict] | None = None
+
+
+def surahs() -> list[dict]:
+    """Return surah metadata: {"number", "name", "english_name", "ayah_count"}."""
+    global _surahs
+    if _surahs is None:
+        with open(_DATA_PATH, encoding="utf-8") as f:
+            raw = json.load(f)
+        _surahs = [
+            {
+                "number": int(s["number"]),
+                "name": s["name"],
+                "english_name": s.get("englishName", ""),
+                "ayah_count": len(s["ayahs"]),
+            }
+            for s in raw["data"]["surahs"]
+        ]
+    return _surahs
+
+
+def ayahs_of_surah(number: int) -> list[dict]:
+    """Return the ordered ayahs of a surah (each with surah/ayah/id/text)."""
+    load_quran()
+    return [a for a in _ayahs if a["surah"] == number]

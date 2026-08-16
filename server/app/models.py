@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -16,6 +16,13 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    # Trainer-platform fields (Qari data collection).
+    role: Mapped[str] = mapped_column(String(20), default="qari")  # qari | admin
+    qiraah: Mapped[str] = mapped_column(String(20), default="hafs")
+    gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    age_range: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    tajweed_level: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    consent_ok: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -32,6 +39,15 @@ class Recitation(Base):
     transcript: Mapped[str] = mapped_column(Text, default="")
     model_version: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(String(30), default="done")
+    # Trainer-platform fields.
+    surah: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ayah: Mapped[int | None] = mapped_column(Integer, nullable=True)  # number in surah
+    audio_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    duration_s: Mapped[float | None] = mapped_column(Float, nullable=True)
+    match_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

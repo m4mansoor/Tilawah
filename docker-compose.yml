@@ -14,14 +14,26 @@ services:
       DATABASE_URL: postgresql://tilawah:${POSTGRES_PASSWORD:-tilawah}@db:5432/tilawah
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
+      AUDIO_DIR: ${AUDIO_DIR:-/data/audio}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
     volumes:
       # Cache the downloaded model so it survives container restarts/reboots.
       - tilawah-models:/root/.cache/huggingface
+      # Persist collected training recitations across redeploys.
+      - tilawah-audio:/data/audio
     depends_on:
       redis:
         condition: service_started
       db:
         condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+    container_name: tilawah-web
+    depends_on:
+      - api
     restart: unless-stopped
 
   caddy:
@@ -36,6 +48,7 @@ services:
       - caddy-config:/config
     depends_on:
       - api
+      - web
     restart: unless-stopped
 
   redis:
@@ -61,6 +74,7 @@ services:
 
 volumes:
   tilawah-models:
+  tilawah-audio:
   tilawah-db:
   caddy-data:
   caddy-config:

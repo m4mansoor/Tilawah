@@ -1,0 +1,355 @@
+import { useEffect, useState, type FormEvent } from "react";
+import type { Coverage, QariProfile, Verse } from "./types";
+import { api, clearToken, getToken, setToken } from "./api";
+import { BrowseView, MyView, ReciteView } from "./ReciteView";
+import { AdminView } from "./AdminView";
+
+type View =
+  | "loading"
+  | "auth"
+  | "onboarding"
+  | "home"
+  | "recite"
+  | "browse"
+  | "my"
+  | "admin";
+
+export default function App() {
+  const [view, setView] = useState<View>("loading");
+  const [profile, setProfile] = useState<QariProfile | null>(null);
+  const [verse, setVerse] = useState<Verse | null>(null);
+  const [coverage, setCoverage] = useState<Coverage | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!getToken()) {
+        setView("auth");
+        return;
+      }
+      try {
+        const p = await api.getProfile();
+        setProfile(p);
+        setView(p.consent_ok ? "home" : "onboarding");
+      } catch {
+        clearToken();
+        setView("auth");
+      }
+    })();
+  }, []);
+
+  async function refreshCoverage() {
+    try {
+      setCoverage(await api.coverage());
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function afterAuth() {
+    const p = await api.getProfile();
+    setProfile(p);
+    setView(p.consent_ok ? "home" : "onboarding");
+  }
+
+  function logout() {
+    clearToken();
+    setProfile(null);
+    setView("auth");
+  }
+
+  function goRecite(v: Verse) {
+    setVerse(v);
+    setView("recite");
+  }
+
+  if (view === "loading") {
+    return (
+      <main className="wrap">
+        <p className="center">Loading…</p>
+      </main>
+    );
+  }
+
+  if (view === "auth") return <AuthView onAuthed={afterAuth} />;
+
+  if (view === "onboarding" && profile) {
+    return (
+      <OnboardingView
+        profile={profile}
+        onDone={(p) => {
+          setProfile(p);
+          setView("home");
+        }}
+      />
+    );
+  }
+
+  if (view === "recite" && verse) {
+    return (
+      <ReciteView
+        verse={verse}
+        onDone={() => {
+          setVerse(null);
+          setView("home");
+          refreshCoverage();
+        }}
+      />
+    );
+  }
+
+  if (view === "browse") {
+    return <BrowseView onPick={goRecite} onBack={() => setView("home")} />;
+  }
+
+  if (view === "my") return <MyView onBack={() => setView("home")} />;
+
+  if (view === "admin" && profile?.role === "admin") {
+    return <AdminView onBack={() => setView("home")} />;
+  }
+
+  return (
+    <HomeView
+      profile={profile!}
+      coverage={coverage}
+      onCoverage={refreshCoverage}
+      onReciteNext={async () => goRecite(await api.nextVerse())}
+      onBrowse={() => setView("browse")}
+      onMy={() => setView("my")}
+      onAdmin={() => setView("admin")}
+      onLogout={logout}
+    />
+  );
+}
+
+function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const res =
+        mode === "login"
+          ? await api.login(email, password)
+          : await api.register(email, password, name || undefined);
+      setToken(res.access_token);
+      await onAuthed();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="wrap narrow">
+      <h1 className="brand">تِلاوَة</h1>
+      <p className="tagline">Qari Recitation — help build the Tilawah model.</p>
+      <form onSubmit={submit} className="card">
+        {mode === "register" && (
+          <label>
+            Name
+            <input value={name} onChange={(e) => setName(e.target.value)} />
+          </label>
+        )}
+        <label>
+          Email
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        </label>
+        <label>
+          Password
+          <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button className="primary" disabled={busy}>
+          {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
+        </button>
+      </form>
+      <p className="muted">
+        {mode === "login" ? "New here? " : "Have an account? "}
+        <button className="link" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+          {mode === "login" ? "Create an account" : "Log in"}
+        </button>
+      </p>
+    </main>
+  );
+}
+
+function OnboardingView({
+  profile,
+  onDone,
+}: {
+  profile: QariProfile;
+  onDone: (p: QariProfile) => void;
+}) {
+  const [name, setName] = useState(profile.name ?? "");
+  const [gender, setGender] = useState(profile.gender ?? "");
+  const [ageRange, setAgeRange] = useState(profile.age_range ?? "");
+  const [level, setLevel] = useState(profile.tajweed_level ?? "");
+  const [consent, setConsent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!consent) {
+      setError("Please consent to recording storage & training use.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const p = await api.updateProfile({
+        name,
+        qiraah: "hafs",
+        gender: gender || null,
+        age_range: ageRange || null,
+        tajweed_level: level || null,
+        consent_ok: true,
+      });
+      onDone(p);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="wrap narrow">
+      <h1>Welcome, {profile.name || profile.email}</h1>
+      <p className="tagline">A few details before you start reciting.</p>
+      <form onSubmit={submit} className="card">
+        <label>
+          Name
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </label>
+        <label>
+          Qira'ah
+          <input value="Hafs 'an 'Asim" disabled />
+        </label>
+        <label>
+          Gender
+          <select value={gender} onChange={(e) => setGender(e.target.value)}>
+            <option value="">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </label>
+        <label>
+          Age range
+          <select value={ageRange} onChange={(e) => setAgeRange(e.target.value)}>
+            <option value="">Prefer not to say</option>
+            <option value="under18">Under 18</option>
+            <option value="18-30">18–30</option>
+            <option value="31-50">31–50</option>
+            <option value="51+">51+</option>
+          </select>
+        </label>
+        <label>
+          Tajweed experience
+          <select value={level} onChange={(e) => setLevel(e.target.value)}>
+            <option value="">Select…</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced / certified</option>
+          </select>
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+          <span>I consent to my recitations being stored and used to train Tilawah's recitation model.</span>
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button className="primary" disabled={busy}>
+          {busy ? "Saving…" : "Start reciting"}
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function HomeView(props: {
+  profile: QariProfile;
+  coverage: Coverage | null;
+  onCoverage: () => Promise<void>;
+  onReciteNext: () => Promise<void>;
+  onBrowse: () => void;
+  onMy: () => void;
+  onAdmin: () => void;
+  onLogout: () => void;
+}) {
+  const { profile, coverage, onCoverage, onReciteNext, onBrowse, onMy, onAdmin, onLogout } = props;
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    onCoverage();
+  }, [onCoverage]);
+
+  async function reciteNext() {
+    setBusy(true);
+    try {
+      await onReciteNext();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="wrap">
+      <header className="topbar">
+        <h1 className="brand">تِلاوَة</h1>
+        <div className="spacer" />
+        <span className="muted">{profile.name || profile.email}</span>
+        <button className="link" onClick={onLogout}>Log out</button>
+      </header>
+
+      {coverage && (
+        <section className="card">
+          <h2>Collection progress</h2>
+          <div className="stat-row">
+            <Stat label="Approved recordings" value={coverage.approved_samples} />
+            <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
+            <Stat label="Fully collected" value={coverage.complete_ayahs} />
+            <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
+          </div>
+          <div className="bar">
+            <div
+              className="bar-fill"
+              style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }}
+            />
+          </div>
+        </section>
+      )}
+
+      <section className="actions">
+        <button className="primary big" onClick={reciteNext} disabled={busy}>
+          {busy ? "Finding a verse…" : "🎙️ Recite next verse"}
+        </button>
+        <div className="action-grid">
+          <button className="card action" onClick={onBrowse}>📖 Browse surahs</button>
+          <button className="card action" onClick={onMy}>🎧 My recordings</button>
+          {profile.role === "admin" && (
+            <button className="card action" onClick={onAdmin}>🛡️ Admin review</button>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="stat">
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
+
+

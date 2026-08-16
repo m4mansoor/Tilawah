@@ -1,14 +1,17 @@
 """Fuzzy verse matching: map a recognized transcript to the intended ayah.
 
 Arabic is normalized by removing diacritics and unifying letter variants, then
-candidates are scored by sequence similarity. Used as a fallback to locate the
-ayah when the user did not select one explicitly.
+candidates are scored by sequence similarity — with a phonetic-class fallback so
+ASR letter confusions (ق/ك, ح/ه, ن/ل, ...) don't prevent a correct match. Used
+as a fallback to locate the ayah when the user did not select one explicitly.
 """
 from __future__ import annotations
 
 import difflib
 import re
 import unicodedata
+
+from .phonetics import phonetic_normalize
 
 # Unify letter variants that differ only in orthography.
 _NORMALIZE_MAP = str.maketrans(
@@ -40,9 +43,23 @@ def strip_basmala(text: str) -> str:
     return text
 
 
+def _score(a: str, b: str) -> float:
+    """Score two normalized Arabic strings, tolerant of phonetic confusions.
+
+    A strong literal match short-circuits; otherwise the phonetic-class form is
+    compared so ASR letter confusions (ق/ك, ح/ه, ن/ل, ...) don't sink an
+    otherwise correct match.
+    """
+    raw = difflib.SequenceMatcher(None, a, b).ratio()
+    if raw >= 0.9:
+        return raw
+    pho = difflib.SequenceMatcher(None, phonetic_normalize(a), phonetic_normalize(b)).ratio()
+    return max(raw, pho)
+
+
 def similarity(recognized: str, candidate: str) -> float:
-    """Return a 0..1 similarity score between two normalized Arabic strings."""
-    return difflib.SequenceMatcher(None, normalize(recognized), normalize(candidate)).ratio()
+    """Return a 0..1 similarity score between two Arabic strings."""
+    return _score(normalize(recognized), normalize(candidate))
 
 
 def find_best_ayah(transcript: str, ayahs: list[dict]) -> dict | None:
@@ -58,9 +75,7 @@ def find_best_ayah(transcript: str, ayahs: list[dict]) -> dict | None:
 
     best, best_score = None, 0.0
     for ayah in ayahs:
-        score = difflib.SequenceMatcher(
-            None, norm_transcript, normalize(ayah["text"])
-        ).ratio()
+        score = _score(norm_transcript, normalize(ayah["text"]))
         if score > best_score:
             best, best_score = ayah, score
     return best if best_score >= 0.6 else None
@@ -81,9 +96,7 @@ def find_best_reference(transcript: str, ayahs: list[dict]) -> dict | None:
 
     def consider(candidate_text: str, candidate_id: int) -> None:
         nonlocal best, best_score
-        score = difflib.SequenceMatcher(
-            None, norm_transcript, normalize(candidate_text)
-        ).ratio()
+        score = _score(norm_transcript, normalize(candidate_text))
         if score > best_score:
             best, best_score = {"text": candidate_text, "id": candidate_id}, score
 

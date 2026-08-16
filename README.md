@@ -16,28 +16,37 @@ See [`docs/architecture.md`](docs/architecture.md) for the full design.
 
 - **Clients:** Tauri v2 (desktop + mobile) + Web platform — all share one API.
 - **App tier:** FastAPI (containerized) — orchestration, verse matching, tajweed diff.
-- **ASR:** Whisper fine-tuned on Quran recitation (Tarteel's open Apache-2.0 model).
+- **ASR:** Whisper fine-tuned on Quran recitation (MaddoggProduction large-v3-turbo Quran LoRA, converted to CTranslate2 int8).
 - **Queue/cache:** Redis (Streams + pub/sub).
 - **Data:** PostgreSQL (self-hosted) + audio files on local NVMe disk.
 
 ## Repository layout
 ```
-quran-corrector/
-├── server/          # FastAPI correction engine (runs on the Hostinger KVM4 VPS)
+tilawah/
+├── server/          # FastAPI engine (runs on the Hostinger KVM4 VPS)
 │   ├── app/
-│   │   ├── main.py        # API endpoints (/health, /v1/correct)
-│   │   ├── config.py      # central settings (model, device, redis)
+│   │   ├── main.py        # API (/health, /v1/correct, /v1/auth/*)
+│   │   ├── trainer.py     # Qari data-collection endpoints (/v1/qari/*, /v1/surahs, /v1/recitations, /v1/coverage, /v1/admin/*)
+│   │   ├── config.py      # central settings (model, device, audio_dir, admin_emails)
 │   │   ├── schemas.py     # request/response models
-│   │   ├── asr.py         # model-agnostic ASR wrapper (Tarteel Whisper)
+│   │   ├── models.py      # SQLAlchemy models (users, recitations, corrections, sessions)
+│   │   ├── migrate.py     # idempotent column migrations + admin seeding
+│   │   ├── asr.py         # faster-whisper ASR wrapper
+│   │   ├── phonetics.py   # makharij (articulation-point) phonetic classes
 │   │   ├── verse_match.py # fuzzy transcript -> ayah matching
-│   │   └── tajweed.py     # word-level correction diff
+│   │   ├── tajweed.py     # word-level correction diff
+│   │   └── quran_data.py  # 6,236 ayahs + surah metadata
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── scripts/convert_model.sh
+├── web/             # Qari web dashboard (Vite + React) — served by Caddy
 ├── apps/
 │   └── desktop/     # Tauri v2 app (React + TS) → Windows/macOS/Android/iOS
 ├── docs/
 │   ├── architecture.md
+│   ├── deployment.md
 │   └── NOTICES.md   # required open-source attribution
+├── Caddyfile
 └── docker-compose.yml
 ```
 
@@ -61,16 +70,38 @@ docker compose up --build
 
 ## API
 
+Core endpoints:
+
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/health` | Liveness probe |
 | POST | `/v1/correct` | Transcribe + correct a recitation (`audio_base64`) |
-| POST | `/v1/auth/register` | Create account → JWT |
-| POST | `/v1/auth/login` | Login → JWT |
+| POST | `/v1/auth/register` · `/v1/auth/login` | Create account / login → JWT |
 | GET | `/v1/auth/me` | Current user (Bearer token) |
 
-The React frontend in `apps/desktop` is the **single codebase for desktop, mobile, and
-web** — served statically it becomes the web platform (the API has CORS enabled).
+Trainer-platform endpoints (Qari data collection):
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET/PUT | `/v1/qari/profile` | Onboarding: qira'ah, gender, level, consent |
+| GET | `/v1/surahs` · `/v1/surahs/{n}` | Browse 114 surahs / 6,236 ayahs |
+| GET | `/v1/qari/next-verse` | Coverage-aware verse assignment |
+| POST | `/v1/recitations` | Submit audio → auto-transcribed + scored |
+| GET | `/v1/recitations/mine` | Own submissions |
+| GET | `/v1/coverage` | Collection progress (counts only) |
+| GET | `/v1/admin/recitations` · POST `/v1/admin/recitations/{id}/review` | Admin review queue |
+
+### Trainer platform (build your own model)
+`web/` is a Qari dashboard: a Qari registers, consents, then gets assigned (or picks)
+a verse, recites it, and submits the audio. Submissions are auto-transcribed and scored
+against the reference; an admin (see `ADMIN_EMAILS`) approves/rejects them. Approved
+recordings become training data — the goal is 5 distinct Qaris per verse across the
+whole Quran before fine-tuning Whisper. Recordings are private (each Qari sees only
+their own); only aggregate counts are shared.
+
+Two frontends share one API:
+- `web/` — the Qari dashboard, served by Caddy at `tilawah.me`.
+- `apps/desktop` — the Tauri correction app (desktop/mobile).
 
 ## Tauri app (Windows / macOS / Android / iOS)
 
@@ -93,12 +124,11 @@ see [`docs/deployment.md`](docs/deployment.md).
 ```bash
 # on the VPS
 git clone https://github.com/m4mansoor/Tilawah.git && cd Tilawah
-cp .env.example .env   # set strong POSTGRES_PASSWORD + JWT_SECRET
-docker compose up -d --build
+cp .env.example .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_EMAILS
+docker compose up -d --build   # builds API + web dashboard; Caddy serves HTTPS
 ```
 
 ## Model & licensing
-- **ASR model:** `tarteel-ai/whisper-base-ar-quran` — Apache-2.0, ungated (no permission needed).
-- **Training data:** `tarteel-ai/everyayah` — MIT.
-- **Optional upgrade:** `MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix` — Apache-2.0.
-- See [`docs/NOTICES.md`](docs/NOTICES.md) for the required attribution (include in the app's licenses screen).
+- **ASR model:** `MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix` — Apache-2.0, converted to CTranslate2 int8 (`quran-ct2`).
+- **Reference text:** Tanzil Quran (public domain), shipped as `server/app/data/quran.json`.
+- See [`docs/NOTICES.md`](docs/NOTICES.md) for the required attribution.

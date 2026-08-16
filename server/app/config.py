@@ -39,5 +39,12 @@ class Settings(BaseSettings):
     # Temporary storage for uploaded audio before processing.
     tmp_dir: str = "/tmp/tilawah"
 
+    # Persistent storage for collected training recitations (Qari platform).
+    # On the VPS, override to /data/audio so recordings survive redeploys.
+    audio_dir: str = "data/audio"
+
+    # Comma-separated emails to promote to the admin role on startup.
+    admin_emails: str = ""
+
 
 settings = Settings()
