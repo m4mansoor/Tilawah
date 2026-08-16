@@ -7,7 +7,8 @@ serverless, so scaling is a configuration change — never a rewrite.
 
 ```
                     ┌─────────────────────────────────────────────┐
-                    │            Cloudflare (DNS · CDN · WAF · DDoS)│
+                    │      Caddy (auto-HTTPS) on the KVM4 VPS       │
+                    │      your domain → A record → VPS IP          │
                     └──────────────────────┬──────────────────────┘
                                            │ HTTPS / WSS
         ┌──────────────┬──────────────┬────┴─────┬──────────────┐
@@ -33,7 +34,7 @@ serverless, so scaling is a configuration change — never a rewrite.
                          │  whisper-large-v3-turbo Quran LoRA │
                          └───────────────────────────────────┘
 
-Data:  PostgreSQL (self-hosted) · Object storage (Cloudflare R2) · Redis
+Data:  PostgreSQL (self-hosted) · Audio files (local NVMe) · Redis
 Obs:   Grafana Cloud (metrics/logs) · Sentry (errors)
 ```
 
@@ -41,7 +42,7 @@ Obs:   Grafana Cloud (metrics/logs) · Sentry (errors)
 
 | Layer | Decision | Rationale |
 |---|---|---|
-| Edge | Cloudflare | Free CDN/WAF/DDoS; R2 storage sits on it (zero egress) |
+| Edge | Caddy (auto-HTTPS) on the VPS | Free TLS via Let's Encrypt; domain A record → VPS IP — no third party needed |
 | Backend | Python **FastAPI** | Same language as ML stack — no boundary friction |
 | App tier | Docker (OCI) containers | Runs on 1 VPS today or Kubernetes tomorrow — migration is config, not rewrite |
 | ASR inference | **faster-whisper** (CTranslate2, int8) | ~4x faster, ~2x less memory than HF transformers |
@@ -50,7 +51,7 @@ Obs:   Grafana Cloud (metrics/logs) · Sentry (errors)
 | Queue | **Redis Streams** | Decouples ingestion from GPU; doubles as cache + rate-limit + pub/sub |
 | Database | **PostgreSQL** (self-hosted) | Own the data — runs in a container on KVM4 with backups |
 | Auth | FastAPI JWT (self-managed) | One auth for web + Tauri + mobile; no third-party dependency |
-| Audio storage | Cloudflare R2 (S3-compatible) | Zero egress fees (audio is egress-heavy) |
+| Audio storage | Local NVMe disk (200 GB on KVM4) | Simplest & cheapest; holds tens of thousands of recordings |
 | Realtime results | Redis pub/sub -> WebSocket | Push corrections to clients as they finish |
 | Observability | Grafana Cloud + Sentry | Managed, free tier |
 | CI/CD | **GitHub Actions** | Builds every app binary + Docker images on GitHub-hosted runners — no physical machines; GitOps-ready |
@@ -102,10 +103,11 @@ built in GitHub Actions — never on the VPS or any local machine.
 3. The model is cached in the `tilawah-models` named volume (no re-download on reboot).
 4. CPU inference with `whisper-base-ar-quran` (74M) is sufficient for the
    **record -> analyze** MVP flow.
-5. Front it with Caddy/Nginx + Cloudflare for TLS and WAF.
+5. Front it with **Caddy** (auto-HTTPS): point your domain's A record at the VPS IP.
 6. **PostgreSQL** runs as the `db` service (persistent `tilawah-db` volume).
-   Schedule nightly `pg_dump` backups to R2 and enable WAL archiving for
-   point-in-time recovery. Auth is self-managed JWT (FastAPI), no third-party provider.
+   Schedule nightly `pg_dump` backups (local + optional offsite) and enable WAL
+   archiving for point-in-time recovery. Auth is self-managed JWT (FastAPI),
+   no third-party provider. Recitation audio files live on the VPS's NVMe disk.
 
 ### Scaling path (additive, no re-architecture)
 - **Higher accuracy / throughput:** point the ASR worker at a serverless GPU

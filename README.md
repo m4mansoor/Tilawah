@@ -18,7 +18,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full design.
 - **App tier:** FastAPI (containerized) — orchestration, verse matching, tajweed diff.
 - **ASR:** Whisper fine-tuned on Quran recitation (Tarteel's open Apache-2.0 model).
 - **Queue/cache:** Redis (Streams + pub/sub).
-- **Data:** PostgreSQL (self-hosted) + object storage (Cloudflare R2).
+- **Data:** PostgreSQL (self-hosted) + audio files on local NVMe disk.
 
 ## Repository layout
 ```
