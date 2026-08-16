@@ -38,6 +38,19 @@ curl https://tilawah.me/health
 The first `/v1/correct` call downloads the Whisper model (~300 MB) into the
 `tilawah-models` volume — it is cached thereafter.
 
+## Model setup (one-time, for best accuracy)
+
+The default `MODEL_ID` points at a Quran-fine-tuned Whisper model that must be
+converted to CTranslate2 once and cached in the `tilawah-models` volume:
+
+```bash
+docker compose exec api sh /app/scripts/convert_model.sh
+docker compose restart api
+```
+
+If this step is skipped, the engine falls back to the vanilla `large-v3-turbo`
+model (still good, but not Quran-tuned).
+
 ## Ports & services
 - **80/443** — Caddy (public HTTPS). Only these should be open in the VPS firewall.
 - **8010** — API (local/debug only; keep closed to the internet).
