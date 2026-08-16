@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
+    # Comma-separated allowed CORS origins, or "*" for any (public API).
+    cors_origins: str = "*"
+
     # Max audio length accepted per correction request (seconds).
     max_audio_seconds: int = 300
 

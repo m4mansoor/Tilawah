@@ -59,6 +59,19 @@ Docker (recommended, matches production on KVM4):
 docker compose up --build
 ```
 
+## API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Liveness probe |
+| POST | `/v1/correct` | Transcribe + correct a recitation (`audio_base64`) |
+| POST | `/v1/auth/register` | Create account → JWT |
+| POST | `/v1/auth/login` | Login → JWT |
+| GET | `/v1/auth/me` | Current user (Bearer token) |
+
+The React frontend in `apps/desktop` is the **single codebase for desktop, mobile, and
+web** — served statically it becomes the web platform (the API has CORS enabled).
+
 ## Tauri app (Windows / macOS / Android / iOS)
 
 ```bash
