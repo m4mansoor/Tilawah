@@ -41,6 +41,7 @@ class CorrectionResponse(BaseModel):
     diacritized: str | None = None
     ayah_id: int | None = None
     matched_ayah_text: str | None = None
+    note: str | None = None
     errors: list[WordError] = []
 
 

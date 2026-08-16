@@ -241,6 +241,30 @@ body {
   margin: 0.5rem 0 1rem;
 }
 
+.matched {
+  margin: 0.25rem 0;
+  color: #41514b;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.matched-arabic {
+  direction: rtl;
+  display: inline-block;
+  color: #123c33;
+}
+
+.note {
+  background: #fdf6e9;
+  border: 1px solid #f0e2c0;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  color: #7a5c2e;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+  text-align: left;
+}
+
 .ok {
   color: #0d7a6a;
   font-weight: 600;

@@ -54,6 +54,7 @@ type CorrectionResponse = {
   transcript: string;
   ayah_id: number | null;
   matched_ayah_text: string | null;
+  note: string | null;
   errors: WordError[];
 };
 
@@ -203,6 +204,15 @@ function App() {
           </div>
           <h2>Your recitation</h2>
           <p className="transcript">{result.transcript || "(no transcript)"}</p>
+
+          {result.matched_ayah_text && (
+            <p className="matched">
+              <strong>Matched verse:</strong>{" "}
+              <span className="matched-arabic">{result.matched_ayah_text}</span>
+            </p>
+          )}
+
+          {result.note && <p className="note">{result.note}</p>}
 
           {result.errors.length === 0 ? (
             <p className="ok">✅ Masha'Allah — no mistakes detected.</p>

@@ -25,28 +25,64 @@ def diff_words(expected: str, recognized: str) -> list[dict]:
     for op, i1, i2, j1, j2 in matcher.get_opcodes():
         if op == "equal":
             continue
-        # Words present in the reference but missing / changed in the recitation.
-        if op in ("replace", "delete"):
-            for idx in range(i1, i2):
+
+        if op == "replace":
+            # Pair up words one-to-one as substitutions where possible.
+            n = min(i2 - i1, j2 - j1)
+            for k in range(n):
                 errors.append(
                     {
-                        "index": idx,
-                        "word": exp_words[idx],
-                        "expected": exp_words[idx],
-                        "recognized": None,
-                        "error_type": "deletion" if op == "delete" else "substitution",
+                        "index": i1 + k,
+                        "word": exp_words[i1 + k],
+                        "expected": exp_words[i1 + k],
+                        "recognized": rec_words[j1 + k],
+                        "error_type": "substitution",
                     }
                 )
-        # Words in the recitation that are extra / wrong.
-        if op in ("replace", "insert"):
-            for idx in range(j1, j2):
+            # Leftover expected words = deletions (user skipped them).
+            for k in range(i1 + n, i2):
                 errors.append(
                     {
-                        "index": idx,
-                        "word": rec_words[idx],
+                        "index": k,
+                        "word": exp_words[k],
+                        "expected": exp_words[k],
+                        "recognized": None,
+                        "error_type": "deletion",
+                    }
+                )
+            # Leftover recognized words = insertions (extra words spoken).
+            for k in range(j1 + n, j2):
+                errors.append(
+                    {
+                        "index": j1,
+                        "word": rec_words[k],
                         "expected": None,
-                        "recognized": rec_words[idx],
-                        "error_type": "insertion" if op == "insert" else "substitution",
+                        "recognized": rec_words[k],
+                        "error_type": "insertion",
+                    }
+                )
+
+        elif op == "delete":
+            for k in range(i1, i2):
+                errors.append(
+                    {
+                        "index": k,
+                        "word": exp_words[k],
+                        "expected": exp_words[k],
+                        "recognized": None,
+                        "error_type": "deletion",
+                    }
+                )
+
+        elif op == "insert":
+            for k in range(j1, j2):
+                errors.append(
+                    {
+                        "index": j1,
+                        "word": rec_words[k],
+                        "expected": None,
+                        "recognized": rec_words[k],
+                        "error_type": "insertion",
                     }
                 )
     return errors

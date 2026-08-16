@@ -129,10 +129,18 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
     ayah_id = reference["id"] if reference else req.ayah_id
     errors = diff_words(reference_text, transcript) if reference_text else []
 
+    note = None
+    if reference is None:
+        note = (
+            "Couldn't confidently match your recitation to a specific verse. "
+            "Try reciting a complete verse slowly and clearly."
+        )
+
     return CorrectionResponse(
         status="ok",
         transcript=transcript,
         ayah_id=ayah_id,
         matched_ayah_text=reference_text,
+        note=note,
         errors=errors,
     )

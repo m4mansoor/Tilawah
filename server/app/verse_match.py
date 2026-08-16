@@ -36,8 +36,13 @@ def find_best_ayah(transcript: str, ayahs: list[dict]) -> dict | None:
     """Return the ayah whose text best matches the transcript.
 
     `ayahs` is a list of ``{"id": int, "text": str}`` (imla'i/Uthmani text).
+    Returns ``None`` when the transcript is too short or too dissimilar to
+    confidently match any verse.
     """
     norm_transcript = normalize(transcript)
+    if len(norm_transcript.split()) < 3:
+        return None  # too short to reliably match
+
     best, best_score = None, 0.0
     for ayah in ayahs:
         score = difflib.SequenceMatcher(
@@ -45,4 +50,4 @@ def find_best_ayah(transcript: str, ayahs: list[dict]) -> dict | None:
         ).ratio()
         if score > best_score:
             best, best_score = ayah, score
-    return best if best_score > 0.5 else None
+    return best if best_score >= 0.6 else None
