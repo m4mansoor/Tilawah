@@ -1,0 +1,135 @@
+:root {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #123c33;
+  background-color: #fdfaf3;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 0.5px;
+}
+
+.arabic {
+  font-size: 1.6rem;
+  color: #0d7a6a;
+  margin-top: 0.25rem;
+}
+
+.tagline {
+  color: #5b6b66;
+}
+
+.controls {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.record {
+  font-size: 1.1rem;
+  padding: 0.85rem 1.8rem;
+  border: none;
+  border-radius: 999px;
+  background: #0d7a6a;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.record:hover {
+  background: #0a6557;
+}
+
+.record.stop {
+  background: #b3403a;
+}
+
+.record:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.hint {
+  color: #5b6b66;
+}
+
+.error {
+  color: #b3403a;
+  text-align: center;
+}
+
+.ok {
+  color: #0d7a6a;
+  font-weight: 600;
+}
+
+.result {
+  background: #fff;
+  border: 1px solid #e6ded0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.transcript {
+  font-size: 1.25rem;
+  color: #123c33;
+  direction: rtl;
+  text-align: right;
+}
+
+.errors {
+  list-style: none;
+  padding: 0;
+}
+
+.errors li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f0e9dc;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  background: #f2e7d3;
+  color: #7a5c2e;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  margin-right: 0.6rem;
+}
+
+.wrong {
+  color: #b3403a;
+}
+
+b {
+  margin: 0 0.25rem;
+}
+

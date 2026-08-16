@@ -33,7 +33,8 @@ quran-corrector/
 │   │   └── tajweed.py     # word-level correction diff
 │   ├── Dockerfile
 │   └── requirements.txt
-├── apps/            # Tauri desktop/mobile + web (next phase)
+├── apps/
+│   └── desktop/     # Tauri v2 app (React + TS) → Windows/macOS/Android/iOS
 ├── docs/
 │   ├── architecture.md
 │   └── NOTICES.md   # required open-source attribution
@@ -57,6 +58,19 @@ Docker (recommended, matches production on KVM4):
 ```bash
 docker compose up --build
 ```
+
+## Tauri app (Windows / macOS / Android / iOS)
+
+```bash
+cd apps/desktop
+npm install
+npm run tauri dev          # desktop (Windows/macOS/Linux)
+npm run tauri android dev  # Android (requires Android SDK + NDK)
+npm run tauri ios dev      # iOS (requires macOS + Xcode)
+```
+
+Release installers for all platforms are built in GitHub Actions
+(`.github/workflows/release.yml`) whenever a `v*` tag is pushed.
 
 ## Model & licensing
 - **ASR model:** `tarteel-ai/whisper-base-ar-quran` — Apache-2.0, ungated (no permission needed).
