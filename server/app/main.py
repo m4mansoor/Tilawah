@@ -28,7 +28,7 @@ from .schemas import (
 )
 from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
-from .verse_match import find_best_ayah
+from .verse_match import find_best_reference
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -149,7 +149,7 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
         reference = get_ayah_by_id(req.ayah_id)
 
     if reference is None:
-        reference = find_best_ayah(transcript, all_ayahs())
+        reference = find_best_reference(transcript, all_ayahs())
 
     reference_text = reference["text"] if reference else None
     ayah_id = reference["id"] if reference else req.ayah_id

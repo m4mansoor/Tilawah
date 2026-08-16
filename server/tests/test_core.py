@@ -34,6 +34,16 @@ class TestVerseMatch(unittest.TestCase):
         self.assertIsNotNone(best)
         self.assertEqual(best["id"], 2)
 
+    def test_matches_full_surah(self):
+        from app.verse_match import find_best_reference, normalize
+
+        ayahs = load_quran()
+        # Surah Al-Ikhlas (112), full, normalized (without Basmala).
+        full = "قل هو الله احد الله الصمد لم يلد ولم يولد ولم يكن له كفوا احد"
+        best = find_best_reference(full, ayahs)
+        self.assertIsNotNone(best)
+        self.assertIn("الصمد", normalize(best["text"]))
+
 
 class TestDiff(unittest.TestCase):
     def test_detects_deletion(self):
