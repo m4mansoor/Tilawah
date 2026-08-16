@@ -1,0 +1,44 @@
+services:
+  api:
+    build:
+      context: ./server
+    container_name: tilawah-api
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_ID: tarteel-ai/whisper-base-ar-quran
+      DEVICE: "-1"
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://tilawah:tilawah@db:5432/tilawah
+      HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
+    volumes:
+      # Cache the downloaded model so it survives container restarts/reboots.
+      - tilawah-models:/root/.cache/huggingface
+    depends_on:
+      - redis
+      - db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tilawah-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: tilawah-db
+    environment:
+      POSTGRES_USER: tilawah
+      POSTGRES_PASSWORD: tilawah
+      POSTGRES_DB: tilawah
+    volumes:
+      - tilawah-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  tilawah-models:
+  tilawah-db:

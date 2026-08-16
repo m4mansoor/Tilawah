@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Model weights (large; never commit)
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.gguf
+
+# Node / Tauri / Rust (future phases)
+node_modules/
+dist/
+target/
+src-tauri/target/
+
+# OS
+.DS_Store
+Thumbs.db
