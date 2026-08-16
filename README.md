@@ -50,8 +50,8 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows  (Linux/macOS: source .venv/bin/activate)
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
-uvicorn app.main:app --reload
-# open http://localhost:8000/docs
+uvicorn app.main:app --reload --port 8010
+# open http://localhost:8010/docs
 ```
 
 Docker (recommended, matches production on KVM4):
