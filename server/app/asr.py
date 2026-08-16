@@ -38,20 +38,18 @@ def get_pipe():
 
 
 def transcribe(audio_path: str) -> str:
-    """Transcribe an audio file to (diacritized) Arabic text."""
+    """Transcribe an audio file to (diacritized) Arabic text.
+
+    Note: the Tarteel Whisper model's generation config predates the
+    `language`/`task` generation arguments, so we rely on auto-detection
+    (the model is fine-tuned on Arabic only, so it reliably emits Arabic).
+    """
     pipe = get_pipe()
-    result = pipe(
-        audio_path,
-        generate_kwargs={"language": "arabic", "task": "transcribe"},
-    )
+    result = pipe(audio_path)
     return result["text"].strip()
 
 
 def transcribe_with_timestamps(audio_path: str):
     """Transcribe returning word-level timestamps (used for highlighting)."""
     pipe = get_pipe()
-    return pipe(
-        audio_path,
-        generate_kwargs={"language": "arabic", "task": "transcribe"},
-        return_timestamps="word",
-    )
+    return pipe(audio_path, return_timestamps="word")
