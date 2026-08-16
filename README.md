@@ -85,6 +85,18 @@ npm run tauri ios dev      # iOS (requires macOS + Xcode)
 Release installers for all platforms are built in GitHub Actions
 (`.github/workflows/release.yml`) whenever a `v*` tag is pushed.
 
+## Deploy to production (tilawah.me)
+
+Full step-by-step deployment to the KVM4 VPS with Caddy auto-HTTPS:
+see [`docs/deployment.md`](docs/deployment.md).
+
+```bash
+# on the VPS
+git clone https://github.com/m4mansoor/Tilawah.git && cd Tilawah
+cp .env.example .env   # set strong POSTGRES_PASSWORD + JWT_SECRET
+docker compose up -d --build
+```
+
 ## Model & licensing
 - **ASR model:** `tarteel-ai/whisper-base-ar-quran` — Apache-2.0, ungated (no permission needed).
 - **Training data:** `tarteel-ai/everyayah` — MIT.

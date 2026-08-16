@@ -8,7 +8,7 @@ serverless, so scaling is a configuration change — never a rewrite.
 ```
                     ┌─────────────────────────────────────────────┐
                     │      Caddy (auto-HTTPS) on the KVM4 VPS       │
-                    │      your domain → A record → VPS IP          │
+                    │      tilawah.me → A record → VPS IP           │
                     └──────────────────────┬──────────────────────┘
                                            │ HTTPS / WSS
         ┌──────────────┬──────────────┬────┴─────┬──────────────┐
@@ -103,7 +103,7 @@ built in GitHub Actions — never on the VPS or any local machine.
 3. The model is cached in the `tilawah-models` named volume (no re-download on reboot).
 4. CPU inference with `whisper-base-ar-quran` (74M) is sufficient for the
    **record -> analyze** MVP flow.
-5. Front it with **Caddy** (auto-HTTPS): point your domain's A record at the VPS IP.
+5. Front it with **Caddy** (auto-HTTPS): point `tilawah.me`'s A record at the VPS IP.
 6. **PostgreSQL** runs as the `db` service (persistent `tilawah-db` volume).
    Schedule nightly `pg_dump` backups (local + optional offsite) and enable WAL
    archiving for point-in-time recovery. Auth is self-managed JWT (FastAPI),

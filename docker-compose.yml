@@ -6,12 +6,13 @@ services:
       context: ./server
     container_name: tilawah-api
     ports:
-      - "8010:8000"
+      - "8010:8000"          # local dev; on the VPS, Caddy is the public entry
     environment:
-      MODEL_ID: tarteel-ai/whisper-base-ar-quran
-      DEVICE: "-1"
+      MODEL_ID: ${MODEL_ID:-tarteel-ai/whisper-base-ar-quran}
+      DEVICE: ${DEVICE:--1}
       REDIS_URL: redis://redis:6379/0
-      DATABASE_URL: postgresql://tilawah:tilawah@db:5432/tilawah
+      DATABASE_URL: postgresql://tilawah:${POSTGRES_PASSWORD:-tilawah}@db:5432/tilawah
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
     volumes:
       # Cache the downloaded model so it survives container restarts/reboots.
@@ -21,6 +22,20 @@ services:
         condition: service_started
       db:
         condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: tilawah-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
     restart: unless-stopped
 
   redis:
@@ -33,7 +48,7 @@ services:
     container_name: tilawah-db
     environment:
       POSTGRES_USER: tilawah
-      POSTGRES_PASSWORD: tilawah
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tilawah}
       POSTGRES_DB: tilawah
     volumes:
       - tilawah-db:/var/lib/postgresql/data
@@ -47,3 +62,5 @@ services:
 volumes:
   tilawah-models:
   tilawah-db:
+  caddy-data:
+  caddy-config:

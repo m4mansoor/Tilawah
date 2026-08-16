@@ -1,0 +1,17 @@
+# Tilawah — Caddy reverse proxy (automatic HTTPS via Let's Encrypt)
+# Proxies everything to the FastAPI container on the internal Docker network.
+
+tilawah.me {
+	encode gzip
+
+	# When the web platform (static React build) is deployed, uncomment:
+	# root * /srv/web
+	# try_files {path} /index.html
+	# file_server
+
+	reverse_proxy api:8000
+}
+
+www.tilawah.me {
+	redir https://tilawah.me{uri}
+}
