@@ -80,7 +80,9 @@ function ReviewRow({
   return (
     <li className="card review-row">
       <div className="review-head">
-        <span className="badge">{r.surah}:{r.ayah}</span>
+        <span className="badge">
+          {r.scope === "surah" ? `Surah ${r.surah}` : r.scope === "juz" ? `Juz ${r.juz}` : `${r.surah}:${r.ayah}`}
+        </span>
         <span className="muted">
           #{r.id} · score {r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}
         </span>

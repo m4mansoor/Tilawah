@@ -32,6 +32,7 @@ def load_quran() -> list[dict]:
                         "id": int(a["number"]),
                         "surah": int(surah["number"]),
                         "ayah": int(a["numberInSurah"]),
+                        "juz": int(a["juz"]),
                         "text": a["text"].replace("\ufeff", "").strip(),
                     }
                 )
@@ -85,3 +86,26 @@ def ayahs_of_surah(number: int) -> list[dict]:
     """Return the ordered ayahs of a surah (each with surah/ayah/id/text)."""
     load_quran()
     return [a for a in _ayahs if a["surah"] == number]
+
+
+def ayahs_of_juz(number: int) -> list[dict]:
+    """Return the ordered ayahs of a juz (1..30)."""
+    load_quran()
+    return [a for a in _ayahs if a["juz"] == number]
+
+
+def juz_list() -> list[dict]:
+    """Return juz metadata: {"number", "start_surah", "start_ayah", "ayah_count"}."""
+    load_quran()
+    juzs: dict[int, dict] = {}
+    for a in _ayahs:
+        j = a["juz"]
+        if j not in juzs:
+            juzs[j] = {
+                "number": j,
+                "start_surah": a["surah"],
+                "start_ayah": a["ayah"],
+                "ayah_count": 0,
+            }
+        juzs[j]["ayah_count"] += 1
+    return [juzs[j] for j in sorted(juzs)]

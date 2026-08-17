@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import type { Coverage, QariProfile, Verse } from "./types";
+import type { Coverage, QariProfile, Selection } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
 import { Crescent, HeroBanner } from "./Art";
 import { BookIcon, HeadphonesIcon, MicIcon, ShieldIcon } from "./icons";
@@ -19,7 +19,7 @@ type View =
 export default function App() {
   const [view, setView] = useState<View>("loading");
   const [profile, setProfile] = useState<QariProfile | null>(null);
-  const [verse, setVerse] = useState<Verse | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [coverage, setCoverage] = useState<Coverage | null>(null);
 
   useEffect(() => {
@@ -59,8 +59,8 @@ export default function App() {
     setView("auth");
   }
 
-  function goRecite(v: Verse) {
-    setVerse(v);
+  function goRecite(s: Selection) {
+    setSelection(s);
     setView("recite");
   }
 
@@ -87,12 +87,12 @@ export default function App() {
     );
   }
 
-  if (view === "recite" && verse) {
+  if (view === "recite" && selection) {
     return (
       <ReciteView
-        verse={verse}
+        selection={selection}
         onDone={() => {
-          setVerse(null);
+          setSelection(null);
           setView("home");
           refreshCoverage();
         }}
@@ -115,7 +115,17 @@ export default function App() {
       profile={profile!}
       coverage={coverage}
       onCoverage={refreshCoverage}
-      onReciteNext={async () => goRecite(await api.nextVerse())}
+      onReciteNext={async () => {
+        const v = await api.nextVerse();
+        goRecite({
+          scope: "ayah",
+          surah: v.surah,
+          ayah: v.ayah,
+          juz: null,
+          text: v.text,
+          label: `${v.surah}:${v.ayah}`,
+        });
+      }}
       onBrowse={() => setView("browse")}
       onMy={() => setView("my")}
       onAdmin={() => setView("admin")}

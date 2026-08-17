@@ -42,6 +42,8 @@ class Recitation(Base):
     # Trainer-platform fields.
     surah: Mapped[int | None] = mapped_column(Integer, nullable=True)
     ayah: Mapped[int | None] = mapped_column(Integer, nullable=True)  # number in surah
+    scope: Mapped[str] = mapped_column(String(20), default="ayah")  # ayah | surah | juz
+    juz: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1..30 when scope == juz
     audio_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     duration_s: Mapped[float | None] = mapped_column(Float, nullable=True)
     match_score: Mapped[float | None] = mapped_column(Float, nullable=True)

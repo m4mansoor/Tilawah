@@ -929,4 +929,47 @@ button {
   color: var(--muted);
 }
 
+/* Score breakdown */
+.score-big {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--green);
+  margin: 6px 0;
+}
+
+.summary {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.error-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  text-align: left;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.error-list li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.error-list .err {
+  text-transform: capitalize;
+}
+
+.error-list .wrong {
+  color: var(--red);
+  font-weight: 600;
+}
+
 

@@ -1,4 +1,4 @@
-import type { Coverage, QariProfile, Recitation, Surah, Verse } from "./types";
+import type { Coverage, Juz, QariProfile, Recitation, Surah, Verse } from "./types";
 
 // Same-origin by default (Caddy proxies /v1 to the API). For local `vite dev`,
 // set VITE_API_URL=http://localhost:8010 via web/.env.development.
@@ -54,11 +54,19 @@ export const api = {
     }),
   surahs: () => request<Surah[]>("/v1/surahs"),
   surahAyahs: (n: number) => request<Verse[]>(`/v1/surahs/${n}`),
+  juzList: () => request<Juz[]>("/v1/juz"),
+  juzAyahs: (n: number) => request<Verse[]>(`/v1/juz/${n}`),
   nextVerse: () => request<Verse>("/v1/qari/next-verse"),
-  submit: (surah: number, ayah: number, audio_base64: string) =>
+  submit: (
+    scope: string,
+    surah: number | null,
+    ayah: number | null,
+    juz: number | null,
+    audio_base64: string,
+  ) =>
     request<Recitation>("/v1/recitations", {
       method: "POST",
-      body: JSON.stringify({ surah, ayah, audio_base64 }),
+      body: JSON.stringify({ scope, surah, ayah, juz, audio_base64 }),
     }),
   mine: () => request<Recitation[]>("/v1/recitations/mine"),
   coverage: () => request<Coverage>("/v1/coverage"),

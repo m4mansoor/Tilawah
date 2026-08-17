@@ -24,16 +24,47 @@ export interface Verse {
   sample_count: number;
 }
 
+export interface Juz {
+  number: number;
+  start_surah: number;
+  start_ayah: number;
+  ayah_count: number;
+}
+
+export type Scope = "ayah" | "surah" | "juz";
+
+export interface Selection {
+  scope: Scope;
+  surah: number | null;
+  ayah: number | null;
+  juz: number | null;
+  text: string;
+  label: string;
+}
+
+export interface WordError {
+  index: number;
+  word: string;
+  expected: string | null;
+  recognized: string | null;
+  error_type: string;
+  tajweed_rule: string | null;
+}
+
 export interface Recitation {
   id: number;
   user_id: number | null;
   surah: number | null;
   ayah: number | null;
+  scope: string;
+  juz: number | null;
   transcript: string;
   match_score: number | null;
   duration_s: number | null;
   status: string;
   review_note: string | null;
+  summary: string | null;
+  errors: WordError[];
   created_at: string | null;
 }
 

@@ -108,6 +108,13 @@ class SurahOut(BaseModel):
     ayah_count: int
 
 
+class JuzOut(BaseModel):
+    number: int
+    start_surah: int
+    start_ayah: int
+    ayah_count: int
+
+
 class VerseOut(BaseModel):
     surah: int
     ayah: int
@@ -116,8 +123,10 @@ class VerseOut(BaseModel):
 
 
 class RecitationSubmit(BaseModel):
-    surah: int = Field(ge=1, le=114)
-    ayah: int = Field(ge=1)
+    scope: str = "ayah"  # ayah | surah | juz
+    surah: int | None = Field(default=None, ge=1, le=114)
+    ayah: int | None = Field(default=None, ge=1)
+    juz: int | None = Field(default=None, ge=1, le=30)
     audio_base64: str
 
 
@@ -128,11 +137,15 @@ class RecitationOut(BaseModel):
     user_id: int | None = None
     surah: int | None = None
     ayah: int | None = None
+    scope: str = "ayah"
+    juz: int | None = None
     transcript: str = ""
     match_score: float | None = None
     duration_s: float | None = None
     status: str = "pending"
     review_note: str | None = None
+    summary: str | None = None
+    errors: list[WordError] = []
     created_at: datetime | None = None
 
 

@@ -28,6 +28,8 @@ _MIGRATIONS: list[tuple[str, str]] = [
     ("users", "ADD COLUMN IF NOT EXISTS consent_ok BOOLEAN DEFAULT FALSE"),
     ("recitations", "ADD COLUMN IF NOT EXISTS surah INTEGER"),
     ("recitations", "ADD COLUMN IF NOT EXISTS ayah INTEGER"),
+    ("recitations", "ADD COLUMN IF NOT EXISTS scope VARCHAR(20) DEFAULT 'ayah'"),
+    ("recitations", "ADD COLUMN IF NOT EXISTS juz INTEGER"),
     ("recitations", "ADD COLUMN IF NOT EXISTS audio_path VARCHAR(500)"),
     ("recitations", "ADD COLUMN IF NOT EXISTS duration_s FLOAT"),
     ("recitations", "ADD COLUMN IF NOT EXISTS match_score FLOAT"),

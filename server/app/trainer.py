@@ -23,10 +23,11 @@ from .asr import transcribe
 from .auth import get_current_user
 from .config import settings
 from .db import get_db
-from .models import Recitation, User
-from .quran_data import all_ayahs, ayahs_of_surah, get_ayah, surahs
+from .models import Correction, Recitation, User
+from .quran_data import all_ayahs, ayahs_of_juz, ayahs_of_surah, get_ayah, juz_list, surahs
 from .schemas import (
     CoverageOut,
+    JuzOut,
     QariProfileOut,
     QariProfileUpdate,
     RecitationOut,
@@ -35,7 +36,9 @@ from .schemas import (
     SurahCoverageOut,
     SurahOut,
     VerseOut,
+    WordError,
 )
+from .tajweed import diff_words
 from .verse_match import similarity, strip_basmala
 
 router = APIRouter(prefix="/v1", tags=["trainer"])
@@ -47,6 +50,42 @@ TARGET_PER_AYAH = 5
 def _clean_text(surah: int, text: str) -> str:
     """Strip the data file's Basmala prefix from ayah 1 (Al-Fatiha excepted)."""
     return strip_basmala(text) if surah != 1 else text
+
+
+def _scope_text(scope: str, surah: int | None, ayah: int | None, juz: int | None) -> str | None:
+    """Return the full reference text for a recitation scope."""
+    if scope == "ayah":
+        a = get_ayah(surah or 0, ayah or 0)
+        return _clean_text(a["surah"], a["text"]) if a else None
+    if scope == "surah":
+        members = ayahs_of_surah(surah or 0)
+        if not members:
+            return None
+        full = " ".join(a["text"] for a in members)
+        return strip_basmala(full) if (surah or 0) != 1 else full
+    if scope == "juz":
+        members = ayahs_of_juz(juz or 0)
+        if not members:
+            return None
+        return " ".join(a["text"] for a in members)
+    return None
+
+
+def _summarize(errors: list[dict]) -> str:
+    """Human summary of what lowered the match score."""
+    if not errors:
+        return "No mistakes detected. Masha'Allah!"
+    subs = sum(1 for e in errors if e["error_type"] == "substitution")
+    dels = sum(1 for e in errors if e["error_type"] == "deletion")
+    ins = sum(1 for e in errors if e["error_type"] == "insertion")
+    parts = []
+    if subs:
+        parts.append(f"{subs} substitution{'s' if subs != 1 else ''}")
+    if dels:
+        parts.append(f"{dels} deletion{'s' if dels != 1 else ''}")
+    if ins:
+        parts.append(f"{ins} insertion{'s' if ins != 1 else ''}")
+    return ", ".join(parts) + " detected."
 
 
 def _require_admin(user: User = Depends(get_current_user)) -> User:
@@ -127,7 +166,7 @@ def list_surah_ayahs(number: int, db: Session = Depends(get_db)) -> list[VerseOu
         raise HTTPException(status_code=404, detail="Surah not found")
     counts = dict(
         db.query(Recitation.ayah, func.count(Recitation.id))
-        .filter(Recitation.surah == number, Recitation.status == "approved")
+        .filter(Recitation.surah == number, Recitation.status == "approved", Recitation.scope == "ayah")
         .group_by(Recitation.ayah)
         .all()
     )
@@ -142,6 +181,26 @@ def list_surah_ayahs(number: int, db: Session = Depends(get_db)) -> list[VerseOu
     ]
 
 
+@router.get("/juz", response_model=list[JuzOut])
+def list_juz() -> list[dict]:
+    return juz_list()
+
+
+@router.get("/juz/{number}", response_model=list[VerseOut])
+def list_juz_ayahs(number: int) -> list[VerseOut]:
+    if number < 1 or number > 30:
+        raise HTTPException(status_code=404, detail="Juz not found")
+    return [
+        VerseOut(
+            surah=a["surah"],
+            ayah=a["ayah"],
+            text=_clean_text(a["surah"], a["text"]),
+            sample_count=0,
+        )
+        for a in ayahs_of_juz(number)
+    ]
+
+
 # --- Assignment ---
 
 
@@ -152,14 +211,14 @@ def next_verse(
     """Return the verse this qari hasn't done yet with the fewest samples."""
     counts = dict(
         db.query(Recitation.surah, Recitation.ayah, func.count(Recitation.id))
-        .filter(Recitation.status == "approved")
+        .filter(Recitation.status == "approved", Recitation.scope == "ayah")
         .group_by(Recitation.surah, Recitation.ayah)
         .all()
     )
     done = {
         (s, a)
         for s, a in db.query(Recitation.surah, Recitation.ayah)
-        .filter(Recitation.user_id == user.id)
+        .filter(Recitation.user_id == user.id, Recitation.scope == "ayah")
         .all()
     }
 
@@ -194,14 +253,15 @@ def submit(
     req: RecitationSubmit,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> Recitation:
-    ayah = get_ayah(req.surah, req.ayah)
-    if ayah is None:
-        raise HTTPException(status_code=404, detail="Verse not found")
+) -> RecitationOut:
     if not user.consent_ok:
         raise HTTPException(
             status_code=400, detail="Consent is required before submitting recitations"
         )
+
+    ref_text = _scope_text(req.scope, req.surah, req.ayah, req.juz)
+    if not ref_text:
+        raise HTTPException(status_code=400, detail="Could not resolve the selected recitation")
 
     audio_path, duration = _persist_audio(req.audio_base64)
     try:
@@ -209,14 +269,22 @@ def submit(
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Transcription failed") from exc
 
-    ref_text = _clean_text(req.surah, ayah["text"])
     match_score = similarity(transcript, ref_text)
+    errors = diff_words(ref_text, transcript)
+    summary = _summarize(errors)
+
+    ayah_id = None
+    if req.scope == "ayah":
+        a = get_ayah(req.surah or 0, req.ayah or 0)
+        ayah_id = a["id"] if a else None
 
     rec = Recitation(
         user_id=user.id,
-        ayah_id=ayah["id"],
+        ayah_id=ayah_id,
         surah=req.surah,
         ayah=req.ayah,
+        scope=req.scope,
+        juz=req.juz,
         audio_path=audio_path,
         duration_s=duration,
         transcript=transcript,
@@ -225,9 +293,37 @@ def submit(
         status="pending",
     )
     db.add(rec)
+    db.flush()
+
+    for e in errors:
+        db.add(
+            Correction(
+                recitation_id=rec.id,
+                word_idx=e["index"],
+                word=e["word"],
+                expected=e["expected"],
+                recognized=e["recognized"],
+                error_type=e["error_type"],
+            )
+        )
     db.commit()
     db.refresh(rec)
-    return rec
+
+    return RecitationOut(
+        id=rec.id,
+        user_id=rec.user_id,
+        surah=rec.surah,
+        ayah=rec.ayah,
+        scope=rec.scope,
+        juz=rec.juz,
+        transcript=rec.transcript,
+        match_score=rec.match_score,
+        duration_s=rec.duration_s,
+        status=rec.status,
+        summary=summary,
+        errors=[WordError(**e) for e in errors[:20]],
+        created_at=rec.created_at,
+    )
 
 
 @router.get("/recitations/mine", response_model=list[RecitationOut])
@@ -249,7 +345,7 @@ def my_recitations(
 def coverage(db: Session = Depends(get_db)) -> CoverageOut:
     rows = (
         db.query(Recitation.surah, Recitation.ayah, func.count(Recitation.id))
-        .filter(Recitation.status == "approved")
+        .filter(Recitation.status == "approved", Recitation.scope == "ayah")
         .group_by(Recitation.surah, Recitation.ayah)
         .all()
     )

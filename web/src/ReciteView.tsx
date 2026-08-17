@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Recitation, Surah, Verse } from "./types";
+import type { Juz, Recitation, Selection, Surah, Verse } from "./types";
 import { api } from "./api";
 import { ArrowLeftIcon, MicIcon, StopIcon } from "./icons";
 
@@ -15,7 +15,7 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void }) {
+export function ReciteView({ selection, onDone }: { selection: Selection; onDone: () => void }) {
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +62,9 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
     setError(null);
     try {
       const b64 = await blobToBase64(blob);
-      setResult(await api.submit(verse.surah, verse.ayah, b64));
+      setResult(
+        await api.submit(selection.scope, selection.surah, selection.ayah, selection.juz, b64),
+      );
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -77,15 +79,14 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
           <ArrowLeftIcon size={20} /> Back
         </button>
         <div className="spacer" />
-        <span className="muted">Reciting</span>
+        <span className="muted">{selection.label}</span>
       </header>
 
       <div className="card verse animate-in">
         <div className="verse-ref">
-          <span className="badge">{verse.surah}:{verse.ayah}</span>
-          <span className="muted">Surah {verse.surah} · Ayah {verse.ayah}</span>
+          <span className="badge">{selection.label}</span>
         </div>
-        <p className="verse-text">{verse.text}</p>
+        <p className="verse-text">{selection.text}</p>
       </div>
 
       {!result ? (
@@ -95,7 +96,7 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
               <button className="mic-btn" onClick={start} aria-label="Start recording">
                 <MicIcon size={40} />
               </button>
-              <p className="hint">Tap the microphone and recite the verse above.</p>
+              <p className="hint">Tap the microphone and recite the selection above.</p>
             </div>
           )}
 
@@ -129,11 +130,24 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
             <path d="M14 27 l8 8 16 -16" />
           </svg>
           <h2>JazakAllah khair!</h2>
-          <p className="muted">Your recitation was submitted and is pending review.</p>
-          <p className="score">
-            Match score:{" "}
-            <b>{result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}</b>
-          </p>
+          <div className="score-big">
+            {result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}
+          </div>
+          <p className="summary">{result.summary || ""}</p>
+          {result.errors && result.errors.length > 0 && (
+            <ul className="error-list">
+              {result.errors.map((e, i) => (
+                <li key={i}>
+                  <span className="badge err">{e.error_type}</span>
+                  {e.expected && <b>{e.expected}</b>}
+                  {e.expected && e.recognized && " → "}
+                  {e.recognized && <span className="wrong">{e.recognized}</span>}
+                  {e.expected && !e.recognized && " (missing)"}
+                  {!e.expected && e.recognized && " (extra)"}
+                </li>
+              ))}
+            </ul>
+          )}
           <button className="primary" onClick={onDone}>Done</button>
         </div>
       )}
@@ -153,9 +167,39 @@ export function BrowseView({
   onPick,
   onBack,
 }: {
-  onPick: (v: Verse) => void;
+  onPick: (s: Selection) => void;
   onBack: () => void;
 }) {
+  const [tab, setTab] = useState<"ayah" | "surah" | "juz">("ayah");
+
+  return (
+    <main className="wrap">
+      <header className="topbar">
+        <h1>Browse</h1>
+        <div className="spacer" />
+        <button className="link" onClick={onBack}>Home</button>
+      </header>
+
+      <div className="seg">
+        <button className={tab === "ayah" ? "seg-active" : ""} onClick={() => setTab("ayah")}>
+          Ayah
+        </button>
+        <button className={tab === "surah" ? "seg-active" : ""} onClick={() => setTab("surah")}>
+          Surah
+        </button>
+        <button className={tab === "juz" ? "seg-active" : ""} onClick={() => setTab("juz")}>
+          Juz
+        </button>
+      </div>
+
+      {tab === "ayah" && <AyahPicker onPick={onPick} />}
+      {tab === "surah" && <SurahPicker onPick={onPick} />}
+      {tab === "juz" && <JuzPicker onPick={onPick} />}
+    </main>
+  );
+}
+
+function AyahPicker({ onPick }: { onPick: (s: Selection) => void }) {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [query, setQuery] = useState("");
   const [ayahs, setAyahs] = useState<Verse[] | null>(null);
@@ -185,13 +229,7 @@ export function BrowseView({
   );
 
   return (
-    <main className="wrap">
-      <header className="topbar">
-        <h1>Browse surahs</h1>
-        <div className="spacer" />
-        <button className="link" onClick={onBack}>Home</button>
-      </header>
-
+    <>
       {!surah ? (
         <>
           <input
@@ -224,7 +262,19 @@ export function BrowseView({
             <ul className="list">
               {ayahs.map((a) => (
                 <li key={a.ayah}>
-                  <button className="list-row" onClick={() => onPick(a)}>
+                  <button
+                    className="list-row"
+                    onClick={() =>
+                      onPick({
+                        scope: "ayah",
+                        surah: surah.number,
+                        ayah: a.ayah,
+                        juz: null,
+                        text: a.text,
+                        label: `${surah.number}:${a.ayah}`,
+                      })
+                    }
+                  >
                     <span className="badge">{surah.number}:{a.ayah}</span>
                     <span className="ayah-preview">{a.text}</span>
                     <span className="muted">{a.sample_count} sample{a.sample_count === 1 ? "" : "s"}</span>
@@ -236,7 +286,87 @@ export function BrowseView({
         </>
       )}
       {error && <p className="error">{error}</p>}
-    </main>
+    </>
+  );
+}
+
+function SurahPicker({ onPick }: { onPick: (s: Selection) => void }) {
+  const [surahs, setSurahs] = useState<Surah[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.surahs().then(setSurahs).catch((e) => setError((e as Error).message));
+  }, []);
+
+  async function pick(s: Surah) {
+    setBusy(s.number);
+    try {
+      const ayahs = await api.surahAyahs(s.number);
+      const text = ayahs.map((a) => a.text).join(" ");
+      onPick({ scope: "surah", surah: s.number, ayah: null, juz: null, text, label: `Surah ${s.name}` });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <>
+      <ul className="list">
+        {surahs.map((s) => (
+          <li key={s.number}>
+            <button className="list-row" onClick={() => pick(s)} disabled={busy === s.number}>
+              <span className="badge">{s.number}</span>
+              <span>{s.name}</span>
+              <span className="muted">{s.english_name} · {s.ayah_count} ayahs</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      {error && <p className="error">{error}</p>}
+    </>
+  );
+}
+
+function JuzPicker({ onPick }: { onPick: (s: Selection) => void }) {
+  const [juzs, setJuzs] = useState<Juz[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.juzList().then(setJuzs).catch((e) => setError((e as Error).message));
+  }, []);
+
+  async function pick(j: Juz) {
+    setBusy(j.number);
+    try {
+      const ayahs = await api.juzAyahs(j.number);
+      const text = ayahs.map((a) => a.text).join(" ");
+      onPick({ scope: "juz", surah: null, ayah: null, juz: j.number, text, label: `Juz ${j.number}` });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <>
+      <ul className="list">
+        {juzs.map((j) => (
+          <li key={j.number}>
+            <button className="list-row" onClick={() => pick(j)} disabled={busy === j.number}>
+              <span className="badge">Juz {j.number}</span>
+              <span className="muted">Starts at {j.start_surah}:{j.start_ayah}</span>
+              <span className="muted">{j.ayah_count} ayahs</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      {error && <p className="error">{error}</p>}
+    </>
   );
 }
 
@@ -261,7 +391,7 @@ export function MyView({ onBack }: { onBack: () => void }) {
       <ul className="list">
         {items.map((r) => (
           <li key={r.id} className="list-row static">
-            <span className="badge">{r.surah}:{r.ayah}</span>
+            <span className="badge">{recitationLabel(r)}</span>
             <span className="muted">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}</span>
             <span className={`status status-${r.status}`}>{r.status}</span>
             <span className="muted">{r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}</span>
@@ -271,5 +401,11 @@ export function MyView({ onBack }: { onBack: () => void }) {
       {error && <p className="error">{error}</p>}
     </main>
   );
+}
+
+function recitationLabel(r: Recitation): string {
+  if (r.scope === "surah") return `Surah ${r.surah}`;
+  if (r.scope === "juz") return `Juz ${r.juz}`;
+  return `${r.surah}:${r.ayah}`;
 }
 
