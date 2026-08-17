@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Recitation, Surah, Verse } from "./types";
 import { api } from "./api";
+import { ArrowLeftIcon, MicIcon, StopIcon } from "./icons";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -19,8 +20,17 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Recitation | null>(null);
+  const [elapsed, setElapsed] = useState(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    if (!recording) return;
+    setElapsed(0);
+    const start = Date.now();
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [recording]);
 
   async function start() {
     setError(null);
@@ -63,36 +73,66 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
   return (
     <main className="wrap narrow">
       <header className="topbar">
-        <h1>Recite</h1>
+        <button className="link back" onClick={onDone}>
+          <ArrowLeftIcon size={20} /> Back
+        </button>
         <div className="spacer" />
-        <button className="link" onClick={onDone}>Home</button>
+        <span className="muted">Reciting</span>
       </header>
 
-      <div className="card verse">
-        <div className="muted">Surah {verse.surah} · Ayah {verse.ayah}</div>
+      <div className="card verse animate-in">
+        <div className="verse-ref">
+          <span className="badge">{verse.surah}:{verse.ayah}</span>
+          <span className="muted">Surah {verse.surah} · Ayah {verse.ayah}</span>
+        </div>
         <p className="verse-text">{verse.text}</p>
       </div>
 
       {!result ? (
-        <div className="controls">
-          {!recording ? (
-            <button className="record" onClick={start} disabled={busy}>🎙️ Start recording</button>
-          ) : (
-            <div className="recording-block">
-              <div className="mic-pulse" aria-hidden>🎙️</div>
-              <p className="hint">Listening… recite slowly and clearly.</p>
-              <button className="record stop" onClick={stop}>⏹ Stop &amp; submit</button>
+        <div className="recorder">
+          {!recording && !busy && (
+            <div className="animate-in d1">
+              <button className="mic-btn" onClick={start} aria-label="Start recording">
+                <MicIcon size={40} />
+              </button>
+              <p className="hint">Tap the microphone and recite the verse above.</p>
             </div>
           )}
-          {busy && <p className="muted">Transcribing &amp; checking…</p>}
+
+          {recording && (
+            <div className="animate-in d1">
+              <div className="wave">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="timer">{formatTime(elapsed)}</div>
+              <button className="record stop" onClick={stop}>
+                <StopIcon size={18} /> Stop &amp; submit
+              </button>
+            </div>
+          )}
+
+          {busy && (
+            <div className="animate-in d1">
+              <div className="spinner" />
+              <p className="muted">Transcribing &amp; checking…</p>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="card success-card">
-          <div className="success-mark">✓</div>
+        <div className="card success-card animate-in">
+          <svg className="checkmark" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="24" />
+            <path d="M14 27 l8 8 16 -16" />
+          </svg>
           <h2>JazakAllah khair!</h2>
           <p className="muted">Your recitation was submitted and is pending review.</p>
-          <p className="muted">
-            Match score: <b>{result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}</b>
+          <p className="score">
+            Match score:{" "}
+            <b>{result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}</b>
           </p>
           <button className="primary" onClick={onDone}>Done</button>
         </div>
@@ -101,6 +141,12 @@ export function ReciteView({ verse, onDone }: { verse: Verse; onDone: () => void
       {error && <p className="error">{error}</p>}
     </main>
   );
+}
+
+function formatTime(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 export function BrowseView({

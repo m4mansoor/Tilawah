@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { Coverage, QariProfile, Verse } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
 import { Crescent, HeroBanner } from "./Art";
+import { BookIcon, HeadphonesIcon, MicIcon, ShieldIcon } from "./icons";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
 
@@ -317,21 +318,28 @@ function HomeView(props: {
         <button className="link" onClick={onLogout}>Log out</button>
       </header>
 
-      <section className="home-banner">
+      <section className="home-banner animate-in">
         <img src="/img/blue-mosque.jpg" alt="" />
         <div className="home-banner-overlay">
-          <div className="home-greeting">Assalamu Alaikum, {profile.name || "Qari"}</div>
+          <div>
+            <div className="home-greeting">Assalamu Alaikum, {profile.name || "Qari"}</div>
+            <div className="home-sub">Your recitation helps build the Quran model.</div>
+          </div>
         </div>
       </section>
 
+      <button className="primary big cta-recite animate-in d1" onClick={reciteNext} disabled={busy}>
+        <MicIcon size={22} />
+        <span>{busy ? "Finding a verse…" : "Start reciting"}</span>
+      </button>
+
       {coverage && (
-        <section className="card">
-          <h2>Collection progress</h2>
-          <div className="stat-row">
-            <Stat label="Approved recordings" value={coverage.approved_samples} />
-            <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
-            <Stat label="Fully collected" value={coverage.complete_ayahs} />
-            <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
+        <section className="card progress-card animate-in d2">
+          <div className="progress-head">
+            <h2>Collection progress</h2>
+            <span className="progress-pct">
+              {Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}%
+            </span>
           </div>
           <div className="bar">
             <div
@@ -339,21 +347,22 @@ function HomeView(props: {
               style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }}
             />
           </div>
+          <div className="stat-row">
+            <Stat label="Approved" value={coverage.approved_samples} />
+            <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
+            <Stat label="Fully collected" value={coverage.complete_ayahs} />
+            <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
+          </div>
         </section>
       )}
 
-      <section className="actions">
-        <button className="primary big" onClick={reciteNext} disabled={busy}>
-          {busy ? "Finding a verse…" : "🎙️ Recite next verse"}
-        </button>
-        <div className="action-grid">
-          <button className="card action" onClick={onBrowse}>📖 Browse surahs</button>
-          <button className="card action" onClick={onMy}>🎧 My recordings</button>
-          {profile.role === "admin" && (
-            <button className="card action" onClick={onAdmin}>🛡️ Admin review</button>
-          )}
-        </div>
-      </section>
+      <div className="action-grid">
+        <ActionCard icon={<BookIcon />} label="Browse surahs" onClick={onBrowse} delay="d3" />
+        <ActionCard icon={<HeadphonesIcon />} label="My recordings" onClick={onMy} delay="d4" />
+        {profile.role === "admin" && (
+          <ActionCard icon={<ShieldIcon />} label="Admin review" onClick={onAdmin} delay="d4" />
+        )}
+      </div>
 
       <footer className="footer">Tilawah · Recite for the Ummah</footer>
     </main>
@@ -366,6 +375,25 @@ function Stat({ label, value }: { label: string; value: string | number }) {
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
     </div>
+  );
+}
+
+function ActionCard({
+  icon,
+  label,
+  onClick,
+  delay,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+  delay?: string;
+}) {
+  return (
+    <button className={`card action animate-in ${delay ?? ""}`} onClick={onClick}>
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
 
