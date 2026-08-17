@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Coverage, QariProfile, Selection } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
 import { Crescent, HeroBanner } from "./Art";
 import { BookIcon, HeadphonesIcon, MicIcon, ShieldIcon } from "./icons";
+import { DailyVerseCard, HadithCard, PrayerTimesCard } from "./widgets";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
 
@@ -320,11 +321,24 @@ function HomeView(props: {
 
   return (
     <main className="wrap">
-      <header className="topbar">
-        <Crescent size={30} />
+      <header className="topbar appbar">
+        <Crescent size={28} />
         <h1 className="brand">تِلاوَة</h1>
+        <nav className="nav">
+          <button className="nav-link" onClick={onBrowse}>
+            <BookIcon size={16} /> Browse
+          </button>
+          <button className="nav-link" onClick={onMy}>
+            <HeadphonesIcon size={16} /> Recordings
+          </button>
+          {profile.role === "admin" && (
+            <button className="nav-link" onClick={onAdmin}>
+              <ShieldIcon size={16} /> Admin
+            </button>
+          )}
+        </nav>
         <div className="spacer" />
-        <span className="muted">{profile.name || profile.email}</span>
+        <span className="muted user">{profile.name || profile.email}</span>
         <button className="link" onClick={onLogout}>Log out</button>
       </header>
 
@@ -343,35 +357,36 @@ function HomeView(props: {
         <span>{busy ? "Finding a verse…" : "Start reciting"}</span>
       </button>
 
-      {coverage && (
-        <section className="card progress-card animate-in d2">
-          <div className="progress-head">
-            <h2>Collection progress</h2>
-            <span className="progress-pct">
-              {Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}%
-            </span>
-          </div>
-          <div className="bar">
-            <div
-              className="bar-fill"
-              style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }}
-            />
-          </div>
-          <div className="stat-row">
-            <Stat label="Approved" value={coverage.approved_samples} />
-            <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
-            <Stat label="Fully collected" value={coverage.complete_ayahs} />
-            <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
-          </div>
-        </section>
-      )}
-
-      <div className="action-grid">
-        <ActionCard icon={<BookIcon />} label="Browse surahs" onClick={onBrowse} delay="d3" />
-        <ActionCard icon={<HeadphonesIcon />} label="My recordings" onClick={onMy} delay="d4" />
-        {profile.role === "admin" && (
-          <ActionCard icon={<ShieldIcon />} label="Admin review" onClick={onAdmin} delay="d4" />
-        )}
+      <div className="home-grid">
+        <div className="home-main">
+          {coverage && (
+            <section className="card progress-card animate-in d2">
+              <div className="progress-head">
+                <h2>Collection progress</h2>
+                <span className="progress-pct">
+                  {Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}%
+                </span>
+              </div>
+              <div className="bar">
+                <div
+                  className="bar-fill"
+                  style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }}
+                />
+              </div>
+              <div className="stat-row">
+                <Stat label="Approved" value={coverage.approved_samples} />
+                <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
+                <Stat label="Fully collected" value={coverage.complete_ayahs} />
+                <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
+              </div>
+            </section>
+          )}
+        </div>
+        <aside className="home-side animate-in d2">
+          <DailyVerseCard />
+          <HadithCard />
+          <PrayerTimesCard />
+        </aside>
       </div>
 
       <footer className="footer">Tilawah · Recite for the Ummah</footer>
@@ -385,25 +400,6 @@ function Stat({ label, value }: { label: string; value: string | number }) {
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
     </div>
-  );
-}
-
-function ActionCard({
-  icon,
-  label,
-  onClick,
-  delay,
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick: () => void;
-  delay?: string;
-}) {
-  return (
-    <button className={`card action animate-in ${delay ?? ""}`} onClick={onClick}>
-      {icon}
-      <span>{label}</span>
-    </button>
   );
 }
 

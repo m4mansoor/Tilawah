@@ -47,7 +47,7 @@ body::before {
 }
 
 .wrap {
-  max-width: 760px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 28px 18px 72px;
   position: relative;
@@ -55,7 +55,7 @@ body::before {
 }
 
 .narrow {
-  max-width: 460px;
+  max-width: 480px;
 }
 
 .center {
@@ -970,6 +970,147 @@ button {
 .error-list .wrong {
   color: var(--red);
   font-weight: 600;
+}
+
+/* App bar */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(247, 243, 233, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 8px 14px;
+  margin-bottom: 20px;
+}
+
+.nav {
+  display: flex;
+  gap: 2px;
+  margin-left: 14px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  background: #ece5d3;
+  color: var(--green-dark);
+}
+
+.user {
+  margin-right: 12px;
+}
+
+/* Home grid */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.home-main {
+  min-width: 0;
+}
+
+.home-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Widget cards */
+.widget-card {
+  padding: 18px;
+}
+
+.widget-title {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--green-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.verse-ar {
+  font-family: "Al Qalam Quran Majeed", "Amiri", serif;
+  font-size: 1.35rem;
+  direction: rtl;
+  line-height: 2;
+  margin: 0 0 6px;
+}
+
+.verse-en {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0 0 8px;
+}
+
+.hadith-text {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.prayer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.prayer {
+  text-align: center;
+  background: linear-gradient(180deg, #fdfbf4, #f7f3e7);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 4px;
+}
+
+.prayer-name {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.prayer-time {
+  font-weight: 700;
+  color: var(--green-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .wrap {
+    max-width: 100%;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .user {
+    display: none;
+  }
 }
 
 
