@@ -76,8 +76,9 @@ export function DailyVerseCard() {
 }
 
 export function HadithCard() {
+  const n = ((dayOfYear() * 29 + 7) % 7563) + 1;
   const { data, error, loading } = useFetch<any>(
-    "https://random-hadith-generator.vercel.app/bukhari/",
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-bukhari/${n}.json`,
   );
 
   if (loading) {
@@ -88,9 +89,8 @@ export function HadithCard() {
     );
   }
 
-  const h = data?.data;
-  const text = h?.hadith_english || h?.hadith || h?.text || "";
-  const source = h?.header || h?.source || h?.book || "Hadith of the day";
+  const h = data?.hadiths?.[0];
+  const text = h?.text || "";
   if (error || !text) {
     return (
       <WidgetCard title="Hadith of the day">
@@ -99,6 +99,7 @@ export function HadithCard() {
     );
   }
 
+  const source = `${data?.metadata?.name || "Sahih al-Bukhari"} · #${h.hadithnumber}`;
   return (
     <WidgetCard title="Hadith of the day">
       <p className="hadith-text">{text}</p>
