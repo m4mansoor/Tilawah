@@ -9,5 +9,8 @@ services:
   web:
     ports:
       - "8080:80"
+      - "8443:8443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
   caddy:
     profiles: ["disabled"]
