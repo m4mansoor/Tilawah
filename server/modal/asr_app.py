@@ -25,14 +25,10 @@ import modal
 
 # Model the worker loads. Default: vanilla large-v3-turbo (auto-downloaded ~1.6 GB).
 # Swap for your converted Quran-tuned CTranslate2 model once it's in a Volume.
-MODEL_ID = "large-v3-turbo"
-
-
-def _download_model() -> None:
-    """Pre-cache the model into the image at build time (fast cold starts)."""
-    from faster_whisper import WhisperModel
-
-    WhisperModel(MODEL_ID, device="cpu", compute_type="int8")
+# Converted Quran-tuned model, mounted from a Modal Volume (created by
+# scripts/modal/convert_model.py — run that once before deploying this worker).
+MODEL_ID = "/models/quran-ct2"
+VOLUME_NAME = "quran-ct2-model"
 
 
 image = (
@@ -41,13 +37,13 @@ image = (
         add_python="3.11",
     )
     .pip_install("faster-whisper")
-    .run_function(_download_model)
 )
 
 app = modal.App("tilawah-asr", image=image)
+volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
 
-@app.cls(gpu="L4", max_containers=8)
+@app.cls(gpu="L4", max_containers=8, volumes={"/models": volume})
 class Transcriber:
     """Loads the model once per warm container, then serves concurrent calls."""
 
