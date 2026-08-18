@@ -49,10 +49,30 @@ def get_model():
     return _model
 
 
+def _remote_transcribe(audio_path: str) -> str:
+    """Transcribe via the deployed Modal GPU worker (serverless L4)."""
+    try:
+        import modal
+    except ImportError as exc:
+        raise RuntimeError(
+            "ASR_BACKEND=modal requires the 'modal' package. Run: pip install modal"
+        ) from exc
+
+    with open(audio_path, "rb") as f:
+        audio_bytes = f.read()
+
+    fn = modal.Function.from_name(settings.modal_asr_name, "Transcriber.transcribe")
+    return fn.remote(audio_bytes, settings.asr_beam_size)
+
+
 def transcribe(audio_path: str) -> str:
     """Transcribe an audio file to Arabic text."""
+    if settings.asr_backend == "modal":
+        return _remote_transcribe(audio_path)
     model = get_model()
-    segments, _info = model.transcribe(audio_path, language="ar", beam_size=5)
+    segments, _info = model.transcribe(
+        audio_path, language="ar", beam_size=settings.asr_beam_size
+    )
     text = " ".join(seg.text.strip() for seg in segments)
     return text.strip()
 
@@ -60,6 +80,8 @@ def transcribe(audio_path: str) -> str:
 def transcribe_with_timestamps(audio_path: str):
     """Transcribe returning word-level segments (used for highlighting)."""
     model = get_model()
-    segments, _info = model.transcribe(audio_path, language="ar", beam_size=5)
+    segments, _info = model.transcribe(
+        audio_path, language="ar", beam_size=settings.asr_beam_size
+    )
     return list(segments)
 

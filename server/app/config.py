@@ -22,6 +22,17 @@ class Settings(BaseSettings):
     # -1 = CPU, 0 = first GPU, 1 = second GPU, ...
     device: int = -1
 
+    # ASR execution backend: "local" (in-process, CPU or GPU per DEVICE above)
+    # or "modal" (serverless L4 GPU via a deployed Modal function).
+    asr_backend: str = "local"
+
+    # Name of the deployed Modal app. The SDK reads credentials from the
+    # MODAL_TOKEN_ID / MODAL_TOKEN_SECRET environment variables.
+    modal_asr_name: str = ""
+
+    # Beam size for decoding. 5 = more accurate / slower; 1 = greedy / ~3-4x faster.
+    asr_beam_size: int = 5
+
     redis_url: str = "redis://localhost:6379/0"
     database_url: str = "postgresql://tilawah:tilawah@localhost:5432/tilawah"
 
