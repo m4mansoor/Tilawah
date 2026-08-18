@@ -1,0 +1,13 @@
+# Run on a SHARED VPS where ports 80/443 are already taken by other apps.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.shared.yml up -d --build
+#
+# - Exposes the web dashboard on port 8080 (nginx also proxies /v1 to the API).
+# - Exposes the API on port 8010 (already in docker-compose.yml).
+# - Disables Caddy (its 80/443 ports belong to other apps on this host).
+services:
+  web:
+    ports:
+      - "8080:80"
+  caddy:
+    profiles: ["disabled"]
