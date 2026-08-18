@@ -29,6 +29,8 @@ _MIGRATIONS: list[tuple[str, str]] = [
     ("users", "ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0"),
     ("users", "ADD COLUMN IF NOT EXISTS streak INTEGER DEFAULT 0"),
     ("users", "ADD COLUMN IF NOT EXISTS last_activity_date DATE"),
+    ("users", "ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE"),
+    ("users", "ADD COLUMN IF NOT EXISTS email_token VARCHAR(120)"),
     ("recitations", "ADD COLUMN IF NOT EXISTS surah INTEGER"),
     ("recitations", "ADD COLUMN IF NOT EXISTS ayah INTEGER"),
     ("recitations", "ADD COLUMN IF NOT EXISTS scope VARCHAR(20) DEFAULT 'ayah'"),

@@ -23,9 +23,11 @@ from .asr import transcribe
 from .auth import get_current_user
 from .config import settings
 from .db import get_db
-from .models import Correction, Recitation, User
+from .models import Assignment, Correction, Recitation, User
 from .quran_data import all_ayahs, ayahs_of_juz, ayahs_of_surah, get_ayah, juz_list, surahs
 from .schemas import (
+    AssignmentCreate,
+    AssignmentOut,
     CoverageOut,
     JuzOut,
     LeaderboardEntry,
@@ -432,6 +434,39 @@ def leaderboard(db: Session = Depends(get_db)) -> list[LeaderboardEntry]:
         )
         for u in rows
     ]
+
+
+# --- Assignments ---
+
+
+@router.post("/admin/assignments", response_model=AssignmentOut, status_code=201)
+def create_assignment(
+    req: AssignmentCreate,
+    admin: User = Depends(_require_admin),
+    db: Session = Depends(get_db),
+) -> Assignment:
+    qari = db.query(User).filter(User.email == req.qari_email.lower()).first()
+    if qari is None:
+        raise HTTPException(status_code=404, detail="Qari not found")
+    a = Assignment(
+        qari_id=qari.id, scope=req.scope, surah=req.surah, ayah=req.ayah, juz=req.juz
+    )
+    db.add(a)
+    db.commit()
+    db.refresh(a)
+    return a
+
+
+@router.get("/assignments/mine", response_model=list[AssignmentOut])
+def my_assignments(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+) -> list[Assignment]:
+    return (
+        db.query(Assignment)
+        .filter(Assignment.qari_id == user.id)
+        .order_by(Assignment.created_at.desc())
+        .all()
+    )
 
 
 # --- Admin review ---

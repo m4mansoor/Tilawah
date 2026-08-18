@@ -26,6 +26,8 @@ class User(Base):
     points: Mapped[int] = mapped_column(Integer, default=0)
     streak: Mapped[int] = mapped_column(Integer, default=0)
     last_activity_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_token: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -83,6 +85,21 @@ class StudySession(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     surah: Mapped[int | None] = mapped_column(Integer, nullable=True)
     progress: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class Assignment(Base):
+    __tablename__ = "assignments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    qari_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    scope: Mapped[str] = mapped_column(String(20), default="ayah")  # ayah | surah | juz
+    surah: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ayah: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    juz: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending | done
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

@@ -49,6 +49,12 @@ type WordError = {
   tajweed_rule: string | null;
 };
 
+type TajweedRule = {
+  rule: string;
+  letter: string;
+  description: string;
+};
+
 type CorrectionResponse = {
   status: string;
   transcript: string;
@@ -56,6 +62,7 @@ type CorrectionResponse = {
   matched_ayah_text: string | null;
   note: string | null;
   errors: WordError[];
+  tajweed: TajweedRule[];
 };
 
 function App() {
@@ -228,6 +235,20 @@ function App() {
                     {e.recognized && <span className="wrong">{e.recognized}</span>}
                     {e.expected && !e.recognized && " (missing)"}
                     {!e.expected && e.recognized && " (extra)"}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {result.tajweed && result.tajweed.length > 0 && (
+            <>
+              <h3>Tajweed rules in this verse ({result.tajweed.length})</h3>
+              <ul className="errors">
+                {result.tajweed.map((r, i) => (
+                  <li key={i}>
+                    <span className="badge">{r.rule}</span>
+                    <span>{r.description}</span>
                   </li>
                 ))}
               </ul>

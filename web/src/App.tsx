@@ -6,6 +6,8 @@ import { BookIcon, HeadphonesIcon, MicIcon, ShieldIcon } from "./icons";
 import { DailyVerseCard, HadithCard, LeaderboardCard, PrayerTimesCard } from "./widgets";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
+import { AssignmentsView } from "./AssignmentsView";
+import { getLang, setLang, t, type Lang } from "./i18n";
 
 type View =
   | "loading"
@@ -15,12 +17,14 @@ type View =
   | "recite"
   | "browse"
   | "my"
+  | "assignments"
   | "admin";
 
 export default function App() {
   const [view, setView] = useState<View>("loading");
   const [profile, setProfile] = useState<QariProfile | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [lang, setLangState] = useState<Lang>(getLang());
   const [coverage, setCoverage] = useState<Coverage | null>(null);
 
   useEffect(() => {
@@ -65,6 +69,12 @@ export default function App() {
     setView("recite");
   }
 
+  function toggleLang() {
+    const next: Lang = lang === "en" ? "ar" : "en";
+    setLang(next);
+    setLangState(next);
+  }
+
   if (view === "loading") {
     return (
       <main className="wrap narrow">
@@ -107,6 +117,10 @@ export default function App() {
 
   if (view === "my") return <MyView onBack={() => setView("home")} />;
 
+  if (view === "assignments") {
+    return <AssignmentsView onRecite={goRecite} onBack={() => setView("home")} />;
+  }
+
   if (view === "admin" && profile?.role === "admin") {
     return <AdminView onBack={() => setView("home")} />;
   }
@@ -129,8 +143,11 @@ export default function App() {
       }}
       onBrowse={() => setView("browse")}
       onMy={() => setView("my")}
+      onAssignments={() => setView("assignments")}
       onAdmin={() => setView("admin")}
       onLogout={logout}
+      onToggleLang={toggleLang}
+      lang={lang}
     />
   );
 }
@@ -300,10 +317,13 @@ function HomeView(props: {
   onReciteNext: () => Promise<void>;
   onBrowse: () => void;
   onMy: () => void;
+  onAssignments: () => void;
   onAdmin: () => void;
   onLogout: () => void;
+  onToggleLang: () => void;
+  lang: Lang;
 }) {
-  const { profile, coverage, onCoverage, onReciteNext, onBrowse, onMy, onAdmin, onLogout } = props;
+  const { profile, coverage, onCoverage, onReciteNext, onBrowse, onMy, onAssignments, onAdmin, onLogout, onToggleLang, lang } = props;
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -326,36 +346,42 @@ function HomeView(props: {
         <h1 className="brand">تِلاوَة</h1>
         <nav className="nav">
           <button className="nav-link" onClick={onBrowse}>
-            <BookIcon size={16} /> Browse
+            <BookIcon size={16} /> {t("nav.browse")}
           </button>
           <button className="nav-link" onClick={onMy}>
-            <HeadphonesIcon size={16} /> Recordings
+            <HeadphonesIcon size={16} /> {t("nav.recordings")}
+          </button>
+          <button className="nav-link" onClick={onAssignments}>
+            {t("nav.assignments")}
           </button>
           {profile.role === "admin" && (
             <button className="nav-link" onClick={onAdmin}>
-              <ShieldIcon size={16} /> Admin
+              <ShieldIcon size={16} /> {t("nav.admin")}
             </button>
           )}
         </nav>
         <div className="spacer" />
+        <button className="lang-btn" onClick={onToggleLang}>
+          {lang === "en" ? "عربي" : "EN"}
+        </button>
         <span className="muted user">{profile.name || profile.email}</span>
         <span className="points-badge">⭐ {profile.points} · 🔥 {profile.streak}</span>
-        <button className="link" onClick={onLogout}>Log out</button>
+        <button className="link" onClick={onLogout}>{t("nav.logout")}</button>
       </header>
 
       <section className="home-banner animate-in">
         <img src="/img/blue-mosque.jpg" alt="" />
         <div className="home-banner-overlay">
           <div>
-            <div className="home-greeting">Assalamu Alaikum, {profile.name || "Qari"}</div>
-            <div className="home-sub">Your recitation helps build the Quran model.</div>
+            <div className="home-greeting">{t("home.greeting")}, {profile.name || "Qari"}</div>
+            <div className="home-sub">{t("home.sub")}</div>
           </div>
         </div>
       </section>
 
       <button className="primary big cta-recite animate-in d1" onClick={reciteNext} disabled={busy}>
         <MicIcon size={22} />
-        <span>{busy ? "Finding a verse…" : "Start reciting"}</span>
+        <span>{busy ? t("home.finding") : t("home.start")}</span>
       </button>
 
       <div className="home-grid">
@@ -363,7 +389,7 @@ function HomeView(props: {
           {coverage && (
             <section className="card progress-card animate-in d2">
               <div className="progress-head">
-                <h2>Collection progress</h2>
+                <h2>{t("home.progress")}</h2>
                 <span className="progress-pct">
                   {Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}%
                 </span>

@@ -92,3 +92,13 @@ export interface LeaderboardEntry {
   points: number;
   streak: number;
 }
+
+export interface Assignment {
+  id: number;
+  qari_id: number;
+  scope: string;
+  surah: number | null;
+  ayah: number | null;
+  juz: number | null;
+  status: string;
+}

@@ -31,5 +31,22 @@ class TestTajweed(unittest.TestCase):
         self.assertGreaterEqual(s.get("madd", 0), 1)
 
 
+class TestDiacriticDiff(unittest.TestCase):
+    def test_detects_harakat_change(self):
+        from app.tajweed import diacritic_diff
+
+        self.assertTrue(diacritic_diff("قُلْ", "قُلِ"))
+
+    def test_no_diff_when_same(self):
+        from app.tajweed import diacritic_diff
+
+        self.assertEqual(diacritic_diff("قُلْ", "قُلْ"), [])
+
+    def test_empty_when_skeleton_differs(self):
+        from app.tajweed import diacritic_diff
+
+        self.assertEqual(diacritic_diff("قُلْ", "كُلْ"), [])
+
+
 if __name__ == "__main__":
     unittest.main()

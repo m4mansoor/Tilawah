@@ -1,4 +1,13 @@
-import type { Coverage, Juz, LeaderboardEntry, QariProfile, Recitation, Surah, Verse } from "./types";
+import type {
+  Assignment,
+  Coverage,
+  Juz,
+  LeaderboardEntry,
+  QariProfile,
+  Recitation,
+  Surah,
+  Verse,
+} from "./types";
 
 // Same-origin by default (Caddy proxies /v1 to the API). For local `vite dev`,
 // set VITE_API_URL=http://localhost:8010 via web/.env.development.
@@ -71,6 +80,18 @@ export const api = {
   mine: () => request<Recitation[]>("/v1/recitations/mine"),
   coverage: () => request<Coverage>("/v1/coverage"),
   leaderboard: () => request<LeaderboardEntry[]>("/v1/leaderboard"),
+  myAssignments: () => request<Assignment[]>("/v1/assignments/mine"),
+  createAssignment: (
+    qari_email: string,
+    scope: string,
+    surah: number | null,
+    ayah: number | null,
+    juz: number | null,
+  ) =>
+    request<Assignment>("/v1/admin/assignments", {
+      method: "POST",
+      body: JSON.stringify({ qari_email, scope, surah, ayah, juz }),
+    }),
   adminQueue: (status?: string) =>
     request<Recitation[]>(
       `/v1/admin/recitations${status ? `?status=${status}` : ""}`,

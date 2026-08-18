@@ -46,5 +46,13 @@ class Settings(BaseSettings):
     # Comma-separated emails to promote to the admin role on startup.
     admin_emails: str = ""
 
+    # Email (SMTP). Leave smtp_host empty to log emails instead of sending.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "noreply@tilawah.me"
+    app_base_url: str = "http://localhost:8010"
+
 
 settings = Settings()

@@ -169,6 +169,39 @@ class LeaderboardEntry(BaseModel):
     streak: int
 
 
+class AssignmentCreate(BaseModel):
+    qari_email: str
+    scope: str = "ayah"
+    surah: int | None = Field(default=None, ge=1, le=114)
+    ayah: int | None = Field(default=None, ge=1)
+    juz: int | None = Field(default=None, ge=1, le=30)
+
+
+class AssignmentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    qari_id: int
+    scope: str
+    surah: int | None = None
+    ayah: int | None = None
+    juz: int | None = None
+    status: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
 class SurahCoverageOut(BaseModel):
     surah: int
     name: str

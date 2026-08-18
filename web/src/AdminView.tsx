@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Recitation } from "./types";
 import { api, fetchAdminAudio } from "./api";
 
@@ -39,6 +39,8 @@ export function AdminView({ onBack }: { onBack: () => void }) {
         <button className="link" onClick={onBack}>Home</button>
       </header>
 
+      <AssignForm />
+
       <div className="seg">
         {["pending", "approved", "rejected"].map((s) => (
           <button key={s} className={status === s ? "seg-active" : ""} onClick={() => setStatus(s)}>
@@ -55,6 +57,62 @@ export function AdminView({ onBack }: { onBack: () => void }) {
       </ul>
       {items.length === 0 && !error && <p className="muted">Nothing here.</p>}
     </main>
+  );
+}
+
+function AssignForm() {
+  const [email, setEmail] = useState("");
+  const [scope, setScope] = useState("ayah");
+  const [surah, setSurah] = useState("");
+  const [ayah, setAyah] = useState("");
+  const [juz, setJuz] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    setDone(false);
+    try {
+      await api.createAssignment(
+        email,
+        scope,
+        surah ? Number(surah) : null,
+        ayah ? Number(ayah) : null,
+        juz ? Number(juz) : null,
+      );
+      setEmail("");
+      setSurah("");
+      setAyah("");
+      setJuz("");
+      setDone(true);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="card" onSubmit={submit}>
+      <h3>Assign a recitation</h3>
+      <div className="assign-grid">
+        <input placeholder="Qari email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <select value={scope} onChange={(e) => setScope(e.target.value)}>
+          <option value="ayah">Ayah</option>
+          <option value="surah">Surah</option>
+          <option value="juz">Juz</option>
+        </select>
+        {scope !== "juz" && <input placeholder="Surah number" value={surah} onChange={(e) => setSurah(e.target.value)} />}
+        {scope === "ayah" && <input placeholder="Ayah number" value={ayah} onChange={(e) => setAyah(e.target.value)} />}
+        {scope === "juz" && <input placeholder="Juz (1-30)" value={juz} onChange={(e) => setJuz(e.target.value)} />}
+      </div>
+      {error && <p className="error">{error}</p>}
+      {done && <p className="ok-note">Assigned.</p>}
+      <button className="primary" disabled={busy}>{busy ? "Assigning…" : "Assign"}</button>
+    </form>
   );
 }
 

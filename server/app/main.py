@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import logging
 import os
+import secrets
 import subprocess
 import uuid
 from contextlib import asynccontextmanager
@@ -16,6 +17,7 @@ from .asr import transcribe
 from .auth import get_current_user
 from .config import settings
 from .db import Base, engine, get_db
+from .mail import send_email
 from .migrate import run_migrations, seed_admin_users
 from .models import User  # noqa: F401  (registers table metadata)
 from .quran_data import all_ayahs, get_ayah, get_ayah_by_id
@@ -23,10 +25,13 @@ from .ratelimit import limiter
 from .schemas import (
     CorrectionRequest,
     CorrectionResponse,
+    ForgotPasswordRequest,
     LoginRequest,
+    ResetPasswordRequest,
     Token,
     UserCreate,
     UserOut,
+    VerifyEmailRequest,
 )
 from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
@@ -77,15 +82,60 @@ def health() -> dict:
 def register(req: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == req.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
+    token = secrets.token_urlsafe(24)
     user = User(
         email=req.email,
         name=req.name,
         password_hash=hash_password(req.password),
+        email_token=token,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+    send_email(
+        user.email,
+        "Verify your Tilawah account",
+        f"Verify your email: {settings.app_base_url}/v1/auth/verify-email?token={token}",
+    )
     return Token(access_token=create_access_token(user.email))
+
+
+@app.post("/v1/auth/verify-email")
+def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email_token == req.token).first()
+    if user is None:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    user.email_verified = True
+    user.email_token = None
+    db.commit()
+    return {"status": "ok", "message": "Email verified"}
+
+
+@app.post("/v1/auth/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == req.email).first()
+    if user is not None:
+        token = secrets.token_urlsafe(24)
+        user.email_token = token
+        db.commit()
+        send_email(
+            user.email,
+            "Reset your Tilawah password",
+            f"Reset your password: {settings.app_base_url}/v1/auth/reset-password?token={token}",
+        )
+    # Do not reveal whether the email exists.
+    return {"status": "ok", "message": "If the email exists, a reset link was sent"}
+
+
+@app.post("/v1/auth/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email_token == req.token).first()
+    if user is None:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    user.password_hash = hash_password(req.password)
+    user.email_token = None
+    db.commit()
+    return {"status": "ok", "message": "Password reset"}
 
 
 @app.post("/v1/auth/login", response_model=Token)
