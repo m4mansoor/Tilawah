@@ -9,7 +9,7 @@ test("auth screen loads with the Tilawah brand", async ({ page }) => {
 
 test("can register and reach onboarding", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Create an account" }).click();
+  await page.getByRole("button", { name: "Create account" }).click();
   await page.getByLabel("Email").fill(`e2e-${Date.now()}@test.com`);
   await page.getByLabel("Password").fill("password123");
   await page.getByRole("button", { name: "Create account" }).click();

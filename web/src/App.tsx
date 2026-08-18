@@ -79,7 +79,7 @@ export default function App() {
     return (
       <main className="wrap narrow">
         <div className="spinner" />
-        <p className="center">Preparing Tilawah…</p>
+        <p className="center">{t("app.loading")}</p>
       </main>
     );
   }
@@ -182,31 +182,31 @@ function AuthView({ onAuthed }: { onAuthed: () => Promise<void> }) {
     <>
       <HeroBanner />
       <main className="wrap narrow">
-        <p className="tagline">Recite for the Ummah. Help build the Quran model.</p>
+        <p className="tagline">{t("auth.tagline")}</p>
         <form onSubmit={submit} className="card">
         {mode === "register" && (
           <label>
-            Name
+            {t("auth.name")}
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
         )}
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         <label>
-          Password
+          {t("auth.password")}
           <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
         </label>
         {error && <p className="error">{error}</p>}
         <button className="primary" disabled={busy}>
-          {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
+          {busy ? t("auth.pleaseWait") : mode === "login" ? t("auth.login") : t("auth.register")}
         </button>
       </form>
       <p className="muted">
-        {mode === "login" ? "New here? " : "Have an account? "}
+        {mode === "login" ? `${t("auth.newHere")} ` : `${t("auth.haveAccount")} `}
         <button className="link" onClick={() => setMode(mode === "login" ? "register" : "login")}>
-          {mode === "login" ? "Create an account" : "Log in"}
+          {mode === "login" ? t("auth.register") : t("auth.login")}
         </button>
       </p>
       </main>
@@ -232,7 +232,7 @@ function OnboardingView({
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!consent) {
-      setError("Please consent to recording storage & training use.");
+      setError(t("onboarding.consentError"));
       return;
     }
     setBusy(true);
@@ -258,51 +258,51 @@ function OnboardingView({
     <>
       <HeroBanner />
       <main className="wrap narrow">
-        <h1>Welcome, {profile.name || profile.email}</h1>
-        <p className="tagline">A few details before you start reciting.</p>
+        <h1>{t("onboarding.welcome")}, {profile.name || profile.email}</h1>
+        <p className="tagline">{t("onboarding.sub")}</p>
         <form onSubmit={submit} className="card">
         <label>
-          Name
+          {t("auth.name")}
           <input value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <label>
-          Qira'ah
+          {t("onboarding.qiraah")}
           <input value="Hafs 'an 'Asim" disabled />
         </label>
         <label>
-          Gender
+          {t("onboarding.gender")}
           <select value={gender} onChange={(e) => setGender(e.target.value)}>
-            <option value="">Prefer not to say</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
+            <option value="">{t("onboarding.preferNo")}</option>
+            <option value="male">{t("onboarding.male")}</option>
+            <option value="female">{t("onboarding.female")}</option>
           </select>
         </label>
         <label>
-          Age range
+          {t("onboarding.ageRange")}
           <select value={ageRange} onChange={(e) => setAgeRange(e.target.value)}>
-            <option value="">Prefer not to say</option>
-            <option value="under18">Under 18</option>
+            <option value="">{t("onboarding.preferNo")}</option>
+            <option value="under18">{t("onboarding.under18")}</option>
             <option value="18-30">18-30</option>
             <option value="31-50">31-50</option>
             <option value="51+">51+</option>
           </select>
         </label>
         <label>
-          Tajweed experience
+          {t("onboarding.tajweed")}
           <select value={level} onChange={(e) => setLevel(e.target.value)}>
-            <option value="">Select…</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced / certified</option>
+            <option value="">{t("onboarding.select")}</option>
+            <option value="beginner">{t("onboarding.beginner")}</option>
+            <option value="intermediate">{t("onboarding.intermediate")}</option>
+            <option value="advanced">{t("onboarding.advanced")}</option>
           </select>
         </label>
         <label className="check">
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-          <span>I consent to my recitations being stored and used to train Tilawah's recitation model.</span>
+          <span>{t("onboarding.consent")}</span>
         </label>
         {error && <p className="error">{error}</p>}
         <button className="primary" disabled={busy}>
-          {busy ? "Saving…" : "Start reciting"}
+          {busy ? t("onboarding.save") : t("home.start")}
         </button>
       </form>
       </main>
@@ -401,10 +401,10 @@ function HomeView(props: {
                 />
               </div>
               <div className="stat-row">
-                <Stat label="Approved" value={coverage.approved_samples} />
-                <Stat label="Verses covered" value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
-                <Stat label="Fully collected" value={coverage.complete_ayahs} />
-                <Stat label="Target / verse" value={`${coverage.target_per_ayah} qaris`} />
+                <Stat label={t("stat.approved")} value={coverage.approved_samples} />
+                <Stat label={t("stat.covered")} value={`${coverage.covered_ayahs} / ${coverage.total_ayahs}`} />
+                <Stat label={t("stat.complete")} value={coverage.complete_ayahs} />
+                <Stat label={t("stat.target")} value={`${coverage.target_per_ayah} qaris`} />
               </div>
             </section>
           )}
@@ -417,7 +417,7 @@ function HomeView(props: {
         </aside>
       </div>
 
-      <footer className="footer">Tilawah · Recite for the Ummah</footer>
+      <footer className="footer">{t("footer.tagline")}</footer>
     </main>
   );
 }

@@ -34,11 +34,14 @@ tilawah/
 │   │   ├── asr.py         # faster-whisper ASR wrapper
 │   │   ├── phonetics.py   # makharij (articulation-point) phonetic classes
 │   │   ├── verse_match.py # fuzzy transcript -> ayah matching
-│   │   ├── tajweed.py     # word-level correction diff
-│   │   └── quran_data.py  # 6,236 ayahs + surah metadata
+│   │   ├── tajweed.py        # word-level correction diff
+│   │   ├── tajweed_rules.py  # madd/ghunnah/qalqalah/idgham/... detection
+│   │   ├── mail.py           # email verification + password reset
+│   │   ├── ratelimit.py      # per-user rate limiting
+│   │   └── quran_data.py     # 6,236 ayahs + surah metadata
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── scripts/convert_model.sh
+│   └── scripts/              # convert_model.sh, train_whisper.py, eval_model.py, segment.py, export_data.py, backup.sh
 ├── web/             # Qari web dashboard (Vite + React) - served by Caddy
 ├── apps/
 │   └── desktop/     # Tauri v2 app (React + TS) → Windows/macOS/Android/iOS
@@ -90,6 +93,10 @@ Trainer-platform endpoints (Qari data collection):
 | GET | `/v1/recitations/mine` | Own submissions |
 | GET | `/v1/coverage` | Collection progress (counts only) |
 | GET | `/v1/admin/recitations` · POST `/v1/admin/recitations/{id}/review` | Admin review queue |
+| GET | `/v1/leaderboard` | Top qaris by points |
+| GET/POST | `/v1/assignments/mine` · `/v1/admin/assignments` | Admin assigns verses to qaris |
+| GET | `/v1/admin/export` | Training-data manifest (JSON) |
+| POST | `/v1/auth/verify` · `/v1/auth/password-reset` | Email verification & password reset |
 
 ### Trainer platform (build your own model)
 `web/` is a Qari dashboard: a Qari registers, consents, then gets assigned (or picks)
@@ -102,6 +109,21 @@ their own); only aggregate counts are shared.
 Two frontends share one API:
 - `web/` - the Qari dashboard, served by Caddy at `tilawah.me`.
 - `apps/desktop` - the Tauri correction app (desktop/mobile).
+
+## Testing
+
+```bash
+# backend unit tests (24 tests: matching, tajweed, security, segmentation)
+cd server && python -m unittest discover -s tests
+
+# web type-check + production build
+cd web && npm run build
+
+# end-to-end smoke tests (needs API on :8010 + web dev server on :5180)
+cd web && npx playwright install   # first run only
+npm run dev &                      # one shell
+npx playwright test                # another shell
+```
 
 ## Tauri app (Windows / macOS / Android / iOS)
 
