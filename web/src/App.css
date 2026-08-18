@@ -1010,6 +1010,59 @@ button {
   color: #f4e6b8;
 }
 
+.points-badge {
+  color: #f4e6b8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-right: 14px;
+  white-space: nowrap;
+}
+
+.leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leaderboard li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.leaderboard li:last-child {
+  border-bottom: none;
+}
+
+.leaderboard .rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #241a05;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.leaderboard .lname {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.leaderboard .lpoints {
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
 .nav {
   display: flex;
   gap: 2px;

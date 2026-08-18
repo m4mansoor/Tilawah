@@ -46,6 +46,13 @@ class CorrectionResponse(BaseModel):
     matched_ayah_text: str | None = None
     note: str | None = None
     errors: list[WordError] = []
+    tajweed: list[TajweedRule] = []
+
+
+class TajweedRule(BaseModel):
+    rule: str
+    letter: str
+    description: str
 
 
 # --- Auth ---
@@ -99,6 +106,8 @@ class QariProfileOut(BaseModel):
     age_range: str | None = None
     tajweed_level: str | None = None
     consent_ok: bool
+    points: int = 0
+    streak: int = 0
 
 
 class SurahOut(BaseModel):
@@ -152,6 +161,12 @@ class RecitationOut(BaseModel):
 class ReviewRequest(BaseModel):
     status: Literal["approved", "rejected"]
     note: str | None = None
+
+
+class LeaderboardEntry(BaseModel):
+    name: str
+    points: int
+    streak: int
 
 
 class SurahCoverageOut(BaseModel):

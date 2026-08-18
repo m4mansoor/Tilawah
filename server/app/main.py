@@ -8,7 +8,7 @@ import subprocess
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,7 @@ from .db import Base, engine, get_db
 from .migrate import run_migrations, seed_admin_users
 from .models import User  # noqa: F401  (registers table metadata)
 from .quran_data import all_ayahs, get_ayah, get_ayah_by_id
+from .ratelimit import limiter
 from .schemas import (
     CorrectionRequest,
     CorrectionResponse,
@@ -29,6 +30,7 @@ from .schemas import (
 )
 from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
+from .tajweed_rules import detect_tajweed
 from .trainer import router as trainer_router
 from .verse_match import find_best_reference
 
@@ -56,6 +58,13 @@ app.add_middleware(
 )
 
 app.include_router(trainer_router)
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    if request.url.path in {"/v1/correct", "/v1/recitations"}:
+        limiter.check(request.client.host if request.client else "unknown")
+    return await call_next(request)
 
 
 @app.get("/health")
@@ -160,6 +169,7 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
     reference_text = reference["text"] if reference else None
     ayah_id = reference["id"] if reference else req.ayah_id
     errors = diff_words(reference_text, transcript) if reference_text else []
+    tajweed = detect_tajweed(reference_text) if reference_text else []
 
     note = None
     if reference is None:
@@ -175,4 +185,5 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
         matched_ayah_text=reference_text,
         note=note,
         errors=errors,
+        tajweed=tajweed,
     )

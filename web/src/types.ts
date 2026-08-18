@@ -8,6 +8,8 @@ export interface QariProfile {
   age_range: string | null;
   tajweed_level: string | null;
   consent_ok: boolean;
+  points: number;
+  streak: number;
 }
 
 export interface Surah {
@@ -83,4 +85,10 @@ export interface Coverage {
   complete_ayahs: number;
   target_per_ayah: number;
   by_surah: SurahCoverage[];
+}
+
+export interface LeaderboardEntry {
+  name: string;
+  points: number;
+  streak: number;
 }

@@ -1,4 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { api } from "./api";
+import type { LeaderboardEntry } from "./types";
 
 function useFetch<T>(url: string) {
   const [data, setData] = useState<T | null>(null);
@@ -38,6 +40,38 @@ function WidgetCard({ title, children }: { title: string; children: ReactNode })
       <h3 className="widget-title">{title}</h3>
       {children}
     </section>
+  );
+}
+
+export function LeaderboardCard() {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    api
+      .leaderboard()
+      .then(setEntries)
+      .catch(() => setError(true));
+  }, []);
+
+  return (
+    <WidgetCard title="Leaderboard">
+      {error ? (
+        <p className="muted">Unavailable.</p>
+      ) : entries.length === 0 ? (
+        <p className="muted">No points yet. Be the first to recite!</p>
+      ) : (
+        <ol className="leaderboard">
+          {entries.map((e, i) => (
+            <li key={i}>
+              <span className="rank">{i + 1}</span>
+              <span className="lname">{e.name}</span>
+              <span className="lpoints">⭐ {e.points}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </WidgetCard>
   );
 }
 

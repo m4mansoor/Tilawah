@@ -12,7 +12,7 @@ import os
 import subprocess
 import uuid
 import wave
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
@@ -28,6 +28,7 @@ from .quran_data import all_ayahs, ayahs_of_juz, ayahs_of_surah, get_ayah, juz_l
 from .schemas import (
     CoverageOut,
     JuzOut,
+    LeaderboardEntry,
     QariProfileOut,
     QariProfileUpdate,
     RecitationOut,
@@ -86,6 +87,30 @@ def _summarize(errors: list[dict]) -> str:
     if ins:
         parts.append(f"{ins} insertion{'s' if ins != 1 else ''}")
     return ", ".join(parts) + " detected."
+
+
+def _track_streak(user: User) -> None:
+    """Update a qari's consecutive-day submission streak."""
+    today = date.today()
+    last = user.last_activity_date
+    if last == today:
+        return
+    if last is not None and (today - last).days == 1:
+        user.streak = (user.streak or 0) + 1
+    else:
+        user.streak = 1
+    user.last_activity_date = today
+
+
+def _award_points(user: User, rec: Recitation) -> None:
+    """Award points when an admin approves a recitation."""
+    if rec.scope == "juz":
+        pts = 100
+    elif rec.scope == "surah":
+        pts = 50
+    else:
+        pts = 10
+    user.points = (user.points or 0) + pts
 
 
 def _require_admin(user: User = Depends(get_current_user)) -> User:
@@ -306,6 +331,7 @@ def submit(
                 error_type=e["error_type"],
             )
         )
+    _track_streak(user)
     db.commit()
     db.refresh(rec)
 
@@ -386,6 +412,28 @@ def coverage(db: Session = Depends(get_db)) -> CoverageOut:
     )
 
 
+# --- Leaderboard ---
+
+
+@router.get("/leaderboard", response_model=list[LeaderboardEntry])
+def leaderboard(db: Session = Depends(get_db)) -> list[LeaderboardEntry]:
+    rows = (
+        db.query(User)
+        .filter(User.points > 0)
+        .order_by(User.points.desc())
+        .limit(10)
+        .all()
+    )
+    return [
+        LeaderboardEntry(
+            name=u.name or (u.email.split("@")[0] if u.email else "Qari"),
+            points=u.points or 0,
+            streak=u.streak or 0,
+        )
+        for u in rows
+    ]
+
+
 # --- Admin review ---
 
 
@@ -417,6 +465,10 @@ def review(
     rec.review_note = req.note
     rec.reviewed_by = admin.id
     rec.reviewed_at = datetime.now(timezone.utc)
+    if req.status == "approved" and rec.user_id:
+        owner = db.get(User, rec.user_id)
+        if owner:
+            _award_points(owner, rec)
     db.commit()
     db.refresh(rec)
     return rec
@@ -434,4 +486,26 @@ def recitation_audio(
     if not os.path.isfile(rec.audio_path):
         raise HTTPException(status_code=404, detail="Audio file missing on disk")
     return FileResponse(rec.audio_path, media_type="audio/wav")
+
+
+@router.get("/admin/export")
+def export_data(
+    admin: User = Depends(_require_admin), db: Session = Depends(get_db)
+) -> list[dict]:
+    """Export approved recordings as a training manifest (audio + transcript)."""
+    rows = db.query(Recitation).filter(Recitation.status == "approved").all()
+    return [
+        {
+            "id": r.id,
+            "scope": r.scope,
+            "surah": r.surah,
+            "ayah": r.ayah,
+            "juz": r.juz,
+            "audio_path": r.audio_path,
+            "transcript": r.transcript,
+            "duration_s": r.duration_s,
+            "qari_id": r.user_id,
+        }
+        for r in rows
+    ]
 

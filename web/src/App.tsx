@@ -3,7 +3,7 @@ import type { Coverage, QariProfile, Selection } from "./types";
 import { api, clearToken, getToken, setToken } from "./api";
 import { Crescent, HeroBanner } from "./Art";
 import { BookIcon, HeadphonesIcon, MicIcon, ShieldIcon } from "./icons";
-import { DailyVerseCard, HadithCard, PrayerTimesCard } from "./widgets";
+import { DailyVerseCard, HadithCard, LeaderboardCard, PrayerTimesCard } from "./widgets";
 import { BrowseView, MyView, ReciteView } from "./ReciteView";
 import { AdminView } from "./AdminView";
 
@@ -339,6 +339,7 @@ function HomeView(props: {
         </nav>
         <div className="spacer" />
         <span className="muted user">{profile.name || profile.email}</span>
+        <span className="points-badge">⭐ {profile.points} · 🔥 {profile.streak}</span>
         <button className="link" onClick={onLogout}>Log out</button>
       </header>
 
@@ -383,6 +384,7 @@ function HomeView(props: {
           )}
         </div>
         <aside className="home-side animate-in d2">
+          <LeaderboardCard />
           <DailyVerseCard />
           <HadithCard />
           <PrayerTimesCard />
