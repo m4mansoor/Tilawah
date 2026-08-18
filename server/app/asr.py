@@ -61,8 +61,8 @@ def _remote_transcribe(audio_path: str) -> str:
     with open(audio_path, "rb") as f:
         audio_bytes = f.read()
 
-    fn = modal.Function.from_name(settings.modal_asr_name, "Transcriber.transcribe")
-    return fn.remote(audio_bytes, settings.asr_beam_size)
+    cls = modal.Cls.from_name(settings.modal_asr_name, "Transcriber")
+    return cls().transcribe.remote(audio_bytes, settings.asr_beam_size)
 
 
 def transcribe(audio_path: str) -> str:

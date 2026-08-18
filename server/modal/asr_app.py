@@ -36,7 +36,10 @@ def _download_model() -> None:
 
 
 image = (
-    modal.Image.debian_slim(python_version="3.11")
+    modal.Image.from_registry(
+        "nvidia/cuda:12.4.0-runtime-ubuntu22.04",
+        add_python="3.11",
+    )
     .pip_install("faster-whisper")
     .run_function(_download_model)
 )
@@ -44,7 +47,7 @@ image = (
 app = modal.App("tilawah-asr", image=image)
 
 
-@app.cls(gpu="L4", container_idle_timeout=300, concurrency_limit=8)
+@app.cls(gpu="L4", max_containers=8)
 class Transcriber:
     """Loads the model once per warm container, then serves concurrent calls."""
 
