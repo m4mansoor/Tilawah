@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { Recitation } from "./types";
 import { api, fetchAdminAudio } from "./api";
+import { statusLabel, t } from "./i18n";
 
 export function AdminView({ onBack }: { onBack: () => void }) {
   const [items, setItems] = useState<Recitation[]>([]);
@@ -34,9 +35,9 @@ export function AdminView({ onBack }: { onBack: () => void }) {
   return (
     <main className="wrap">
       <header className="topbar">
-        <h1>Admin review</h1>
+        <h1>{t("admin.title")}</h1>
         <div className="spacer" />
-        <button className="link" onClick={onBack}>Home</button>
+        <button className="link" onClick={onBack}>{t("common.home")}</button>
       </header>
 
       <AssignForm />
@@ -44,7 +45,7 @@ export function AdminView({ onBack }: { onBack: () => void }) {
       <div className="seg">
         {["pending", "approved", "rejected"].map((s) => (
           <button key={s} className={status === s ? "seg-active" : ""} onClick={() => setStatus(s)}>
-            {s}
+            {statusLabel(s)}
           </button>
         ))}
       </div>
@@ -55,7 +56,7 @@ export function AdminView({ onBack }: { onBack: () => void }) {
           <ReviewRow key={r.id} r={r} onReview={review} disabled={busy} />
         ))}
       </ul>
-      {items.length === 0 && !error && <p className="muted">Nothing here.</p>}
+      {items.length === 0 && !error && <p className="muted">{t("admin.nothing")}</p>}
     </main>
   );
 }
@@ -97,21 +98,21 @@ function AssignForm() {
 
   return (
     <form className="card" onSubmit={submit}>
-      <h3>Assign a recitation</h3>
+      <h3>{t("admin.assignTitle")}</h3>
       <div className="assign-grid">
-        <input placeholder="Qari email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input placeholder={t("admin.qariEmail")} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <select value={scope} onChange={(e) => setScope(e.target.value)}>
-          <option value="ayah">Ayah</option>
-          <option value="surah">Surah</option>
-          <option value="juz">Juz</option>
+          <option value="ayah">{t("common.ayah")}</option>
+          <option value="surah">{t("common.surah")}</option>
+          <option value="juz">{t("common.juz")}</option>
         </select>
-        {scope !== "juz" && <input placeholder="Surah number" value={surah} onChange={(e) => setSurah(e.target.value)} />}
-        {scope === "ayah" && <input placeholder="Ayah number" value={ayah} onChange={(e) => setAyah(e.target.value)} />}
-        {scope === "juz" && <input placeholder="Juz (1-30)" value={juz} onChange={(e) => setJuz(e.target.value)} />}
+        {scope !== "juz" && <input placeholder={t("admin.surahNumber")} value={surah} onChange={(e) => setSurah(e.target.value)} />}
+        {scope === "ayah" && <input placeholder={t("admin.ayahNumber")} value={ayah} onChange={(e) => setAyah(e.target.value)} />}
+        {scope === "juz" && <input placeholder={t("admin.juzRange")} value={juz} onChange={(e) => setJuz(e.target.value)} />}
       </div>
       {error && <p className="error">{error}</p>}
-      {done && <p className="ok-note">Assigned.</p>}
-      <button className="primary" disabled={busy}>{busy ? "Assigning…" : "Assign"}</button>
+      {done && <p className="ok-note">{t("admin.assigned")}</p>}
+      <button className="primary" disabled={busy}>{busy ? t("admin.assigning") : t("admin.assign")}</button>
     </form>
   );
 }
@@ -139,24 +140,24 @@ function ReviewRow({
     <li className="card review-row">
       <div className="review-head">
         <span className="badge">
-          {r.scope === "surah" ? `Surah ${r.surah}` : r.scope === "juz" ? `Juz ${r.juz}` : `${r.surah}:${r.ayah}`}
+          {r.scope === "surah" ? `${t("common.surah")} ${r.surah}` : r.scope === "juz" ? `${t("common.juz")} ${r.juz}` : `${r.surah}:${r.ayah}`}
         </span>
         <span className="muted">
-          #{r.id} · score {r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}
+          #{r.id} · {t("admin.score")} {r.match_score != null ? Math.round(r.match_score * 100) + "%" : "-"}
         </span>
       </div>
-      <p className="muted transcript">Heard: {r.transcript || "(empty)"}</p>
+      <p className="muted transcript">{t("admin.heard")} {r.transcript || t("admin.emptyTranscript")}</p>
       {audio ? (
         <audio controls autoPlay src={audio} />
       ) : (
-        <button className="link" onClick={play}>▶ Play audio</button>
+        <button className="link" onClick={play}>{t("admin.playAudio")}</button>
       )}
       <div className="review-actions">
         <button className="approve" disabled={disabled || r.status === "approved"} onClick={() => onReview(r.id, "approved")}>
-          ✓ Approve
+          {t("admin.approve")}
         </button>
         <button className="reject" disabled={disabled || r.status === "rejected"} onClick={() => onReview(r.id, "rejected")}>
-          ✕ Reject
+          {t("admin.reject")}
         </button>
       </div>
     </li>

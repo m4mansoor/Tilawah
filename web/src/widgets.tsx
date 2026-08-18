@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
 import type { LeaderboardEntry } from "./types";
+import { t } from "./i18n";
 
 function useFetch<T>(url: string) {
   const [data, setData] = useState<T | null>(null);
@@ -55,11 +56,11 @@ export function LeaderboardCard() {
   }, []);
 
   return (
-    <WidgetCard title="Leaderboard">
+    <WidgetCard title={t("widget.leaderboard")}>
       {error ? (
-        <p className="muted">Unavailable.</p>
+        <p className="muted">{t("common.unavailable")}</p>
       ) : entries.length === 0 ? (
-        <p className="muted">No points yet. Be the first to recite!</p>
+        <p className="muted">{t("widget.noPoints")}</p>
       ) : (
         <ol className="leaderboard">
           {entries.map((e, i) => (
@@ -83,15 +84,15 @@ export function DailyVerseCard() {
 
   if (loading) {
     return (
-      <WidgetCard title="Verse of the day">
-        <p className="muted">Loading…</p>
+      <WidgetCard title={t("widget.verse")}>
+        <p className="muted">{t("common.loading")}</p>
       </WidgetCard>
     );
   }
   if (error || !data?.data?.[0]) {
     return (
-      <WidgetCard title="Verse of the day">
-        <p className="muted">Unavailable right now.</p>
+      <WidgetCard title={t("widget.verse")}>
+        <p className="muted">{t("common.unavailableNow")}</p>
       </WidgetCard>
     );
   }
@@ -99,11 +100,11 @@ export function DailyVerseCard() {
   const ar = data.data[0];
   const en = data.data[1];
   return (
-    <WidgetCard title="Verse of the day">
+    <WidgetCard title={t("widget.verse")}>
       <p className="verse-ar">{ar.text}</p>
       <p className="verse-en">"{en?.text}"</p>
       <span className="muted">
-        Surah {ar.surah?.englishName} · {ar.numberInSurah}
+        {t("common.surah")} {ar.surah?.englishName} · {ar.numberInSurah}
       </span>
     </WidgetCard>
   );
@@ -117,8 +118,8 @@ export function HadithCard() {
 
   if (loading) {
     return (
-      <WidgetCard title="Hadith of the day">
-        <p className="muted">Loading…</p>
+      <WidgetCard title={t("widget.hadith")}>
+        <p className="muted">{t("common.loading")}</p>
       </WidgetCard>
     );
   }
@@ -127,15 +128,15 @@ export function HadithCard() {
   const text = h?.text || "";
   if (error || !text) {
     return (
-      <WidgetCard title="Hadith of the day">
-        <p className="muted">Unavailable right now.</p>
+      <WidgetCard title={t("widget.hadith")}>
+        <p className="muted">{t("common.unavailableNow")}</p>
       </WidgetCard>
     );
   }
 
   const source = `${data?.metadata?.name || "Sahih al-Bukhari"} · #${h.hadithnumber}`;
   return (
-    <WidgetCard title="Hadith of the day">
+    <WidgetCard title={t("widget.hadith")}>
       <p className="hadith-text">{text}</p>
       <span className="muted">{source}</span>
     </WidgetCard>
@@ -149,30 +150,30 @@ export function PrayerTimesCard() {
 
   if (loading) {
     return (
-      <WidgetCard title="Prayer times">
-        <p className="muted">Loading…</p>
+      <WidgetCard title={t("widget.prayer")}>
+        <p className="muted">{t("common.loading")}</p>
       </WidgetCard>
     );
   }
   if (error || !data?.data?.timings) {
     return (
-      <WidgetCard title="Prayer times">
-        <p className="muted">Unavailable right now.</p>
+      <WidgetCard title={t("widget.prayer")}>
+        <p className="muted">{t("common.unavailableNow")}</p>
       </WidgetCard>
     );
   }
 
-  const t = data.data.timings;
+  const timings = data.data.timings;
   const items: Array<[string, string]> = [
-    ["Fajr", t.Fajr],
-    ["Dhuhr", t.Dhuhr],
-    ["Asr", t.Asr],
-    ["Maghrib", t.Maghrib],
-    ["Isha", t.Isha],
+    [t("widget.fajr"), timings.Fajr],
+    [t("widget.dhuhr"), timings.Dhuhr],
+    [t("widget.asr"), timings.Asr],
+    [t("widget.maghrib"), timings.Maghrib],
+    [t("widget.isha"), timings.Isha],
   ];
 
   return (
-    <WidgetCard title="Prayer times">
+    <WidgetCard title={t("widget.prayer")}>
       <div className="prayer-grid">
         {items.map(([name, time]) => (
           <div className="prayer" key={name}>
@@ -181,7 +182,7 @@ export function PrayerTimesCard() {
           </div>
         ))}
       </div>
-      <span className="muted">Mecca, Saudi Arabia</span>
+      <span className="muted">{t("widget.mecca")}</span>
     </WidgetCard>
   );
 }

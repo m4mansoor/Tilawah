@@ -47,12 +47,76 @@ const dict: Record<string, { en: string; ar: string }> = {
   "widget.verse": { en: "Verse of the day", ar: "آية اليوم" },
   "widget.hadith": { en: "Hadith of the day", ar: "حديث اليوم" },
   "widget.prayer": { en: "Prayer times", ar: "مواقيت الصلاة" },
+
+  "common.home": { en: "Home", ar: "الرئيسية" },
+  "common.back": { en: "Back", ar: "رجوع" },
+  "common.loading": { en: "Loading…", ar: "جارٍ التحميل…" },
+  "common.unavailable": { en: "Unavailable.", ar: "غير متاح." },
+  "common.unavailableNow": { en: "Unavailable right now.", ar: "غير متاح حالياً." },
+  "common.ayah": { en: "Ayah", ar: "آية" },
+  "common.surah": { en: "Surah", ar: "سورة" },
+  "common.juz": { en: "Juz", ar: "جزء" },
+  "common.ayahs": { en: "ayahs", ar: "آيات" },
+  "common.sample": { en: "sample", ar: "عينة" },
+  "common.samples": { en: "samples", ar: "عينات" },
+
+  "recite.micDenied": { en: "Microphone access denied. Please allow mic access and try again.", ar: "تم رفض الوصول إلى الميكروفون. يرجى السماح بالوصول والمحاولة مرة أخرى." },
+  "recite.startHint": { en: "Tap the microphone and recite the selection above.", ar: "اضغط على الميكروفون وتلُ المقطع أعلاه." },
+  "recite.startRecording": { en: "Start recording", ar: "ابدأ التسجيل" },
+  "recite.stopSubmit": { en: "Stop & submit", ar: "إيقاف وإرسال" },
+  "recite.transcribing": { en: "Transcribing & checking…", ar: "جارٍ التفريغ والتدقيق…" },
+  "recite.thanks": { en: "JazakAllah khair!", ar: "جزاك الله خيراً!" },
+  "recite.done": { en: "Done", ar: "تم" },
+  "recite.missing": { en: "(missing)", ar: "(ناقص)" },
+  "recite.extra": { en: "(extra)", ar: "(زائد)" },
+  "recite.searchSurah": { en: "Search surah…", ar: "ابحث عن سورة…" },
+  "recite.allSurahs": { en: "← All surahs", ar: "← جميع السور" },
+  "recite.startsAt": { en: "Starts at", ar: "تبدأ عند" },
+
+  "my.title": { en: "My recordings", ar: "تسجيلاتي" },
+  "my.empty": { en: "You haven't recorded anything yet.", ar: "لم تسجل أي شيء بعد." },
+
+  "assignments.empty": { en: "No assignments yet.", ar: "لا توجد مهام بعد." },
+  "assignments.recite": { en: "Recite", ar: "تلاوة" },
+
+  "admin.title": { en: "Admin review", ar: "مراجعة الإدارة" },
+  "admin.nothing": { en: "Nothing here.", ar: "لا شيء هنا." },
+  "admin.assignTitle": { en: "Assign a recitation", ar: "إسناد تلاوة" },
+  "admin.qariEmail": { en: "Qari email", ar: "البريد الإلكتروني للقارئ" },
+  "admin.surahNumber": { en: "Surah number", ar: "رقم السورة" },
+  "admin.ayahNumber": { en: "Ayah number", ar: "رقم الآية" },
+  "admin.juzRange": { en: "Juz (1-30)", ar: "الجزء (1-30)" },
+  "admin.assigned": { en: "Assigned.", ar: "تم الإسناد." },
+  "admin.assigning": { en: "Assigning…", ar: "جارٍ الإسناد…" },
+  "admin.assign": { en: "Assign", ar: "إسناد" },
+  "admin.score": { en: "score", ar: "النتيجة" },
+  "admin.heard": { en: "Heard:", ar: "المسموع:" },
+  "admin.emptyTranscript": { en: "(empty)", ar: "(فارغ)" },
+  "admin.playAudio": { en: "▶ Play audio", ar: "▶ تشغيل الصوت" },
+  "admin.approve": { en: "✓ Approve", ar: "✓ موافقة" },
+  "admin.reject": { en: "✕ Reject", ar: "✕ رفض" },
+
+  "status.pending": { en: "pending", ar: "قيد المراجعة" },
+  "status.approved": { en: "approved", ar: "مقبول" },
+  "status.rejected": { en: "rejected", ar: "مرفوض" },
+
+  "widget.noPoints": { en: "No points yet. Be the first to recite!", ar: "لا نقاط بعد. كن أول من يتلو!" },
+  "widget.mecca": { en: "Mecca, Saudi Arabia", ar: "مكة المكرمة، السعودية" },
+  "widget.fajr": { en: "Fajr", ar: "الفجر" },
+  "widget.dhuhr": { en: "Dhuhr", ar: "الظهر" },
+  "widget.asr": { en: "Asr", ar: "العصر" },
+  "widget.maghrib": { en: "Maghrib", ar: "المغرب" },
+  "widget.isha": { en: "Isha", ar: "العشاء" },
 };
 
 let current: Lang = (localStorage.getItem("tilawah_lang") as Lang) || "en";
 
 export function t(key: string): string {
   return dict[key]?.[current] ?? dict[key]?.en ?? key;
+}
+
+export function statusLabel(status: string): string {
+  return dict[`status.${status}`]?.[current] ?? status;
 }
 
 export function getLang(): Lang {

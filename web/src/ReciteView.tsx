@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Juz, Recitation, Selection, Surah, Verse } from "./types";
 import { api } from "./api";
+import { t } from "./i18n";
 import { ArrowLeftIcon, MicIcon, StopIcon } from "./icons";
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -48,7 +49,7 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
       rec.start();
       setRecording(true);
     } catch {
-      setError("Microphone access denied. Please allow mic access and try again.");
+      setError(t("recite.micDenied"));
     }
   }
 
@@ -76,7 +77,7 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
     <main className="wrap narrow">
       <header className="topbar">
         <button className="link back" onClick={onDone}>
-          <ArrowLeftIcon size={20} /> Back
+          <ArrowLeftIcon size={20} /> {t("common.back")}
         </button>
         <div className="spacer" />
         <span className="muted">{selection.label}</span>
@@ -93,10 +94,10 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
         <div className="recorder">
           {!recording && !busy && (
             <div className="animate-in d1">
-              <button className="mic-btn" onClick={start} aria-label="Start recording">
+              <button className="mic-btn" onClick={start} aria-label={t("recite.startRecording")}>
                 <MicIcon size={40} />
               </button>
-              <p className="hint">Tap the microphone and recite the selection above.</p>
+              <p className="hint">{t("recite.startHint")}</p>
             </div>
           )}
 
@@ -111,7 +112,7 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
               </div>
               <div className="timer">{formatTime(elapsed)}</div>
               <button className="record stop" onClick={stop}>
-                <StopIcon size={18} /> Stop &amp; submit
+                <StopIcon size={18} /> {t("recite.stopSubmit")}
               </button>
             </div>
           )}
@@ -119,7 +120,7 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
           {busy && (
             <div className="animate-in d1">
               <div className="spinner" />
-              <p className="muted">Transcribing &amp; checking…</p>
+              <p className="muted">{t("recite.transcribing")}</p>
             </div>
           )}
         </div>
@@ -129,7 +130,7 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
             <circle cx="26" cy="26" r="24" />
             <path d="M14 27 l8 8 16 -16" />
           </svg>
-          <h2>JazakAllah khair!</h2>
+          <h2>{t("recite.thanks")}</h2>
           <div className="score-big">
             {result.match_score != null ? Math.round(result.match_score * 100) + "%" : "-"}
           </div>
@@ -142,13 +143,13 @@ export function ReciteView({ selection, onDone }: { selection: Selection; onDone
                   {e.expected && <b>{e.expected}</b>}
                   {e.expected && e.recognized && " → "}
                   {e.recognized && <span className="wrong">{e.recognized}</span>}
-                  {e.expected && !e.recognized && " (missing)"}
-                  {!e.expected && e.recognized && " (extra)"}
+                  {e.expected && !e.recognized && ` ${t("recite.missing")}`}
+                  {!e.expected && e.recognized && ` ${t("recite.extra")}`}
                 </li>
               ))}
             </ul>
           )}
-          <button className="primary" onClick={onDone}>Done</button>
+          <button className="primary" onClick={onDone}>{t("recite.done")}</button>
         </div>
       )}
 
@@ -175,20 +176,20 @@ export function BrowseView({
   return (
     <main className="wrap">
       <header className="topbar">
-        <h1>Browse</h1>
+        <h1>{t("nav.browse")}</h1>
         <div className="spacer" />
-        <button className="link" onClick={onBack}>Home</button>
+        <button className="link" onClick={onBack}>{t("common.home")}</button>
       </header>
 
       <div className="seg">
         <button className={tab === "ayah" ? "seg-active" : ""} onClick={() => setTab("ayah")}>
-          Ayah
+          {t("common.ayah")}
         </button>
         <button className={tab === "surah" ? "seg-active" : ""} onClick={() => setTab("surah")}>
-          Surah
+          {t("common.surah")}
         </button>
         <button className={tab === "juz" ? "seg-active" : ""} onClick={() => setTab("juz")}>
-          Juz
+          {t("common.juz")}
         </button>
       </div>
 
@@ -234,7 +235,7 @@ function AyahPicker({ onPick }: { onPick: (s: Selection) => void }) {
         <>
           <input
             className="search"
-            placeholder="Search surah…"
+            placeholder={t("recite.searchSurah")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -244,7 +245,7 @@ function AyahPicker({ onPick }: { onPick: (s: Selection) => void }) {
                 <button className="list-row" onClick={() => open(s)}>
                   <span className="badge">{s.number}</span>
                   <span>{s.name}</span>
-                  <span className="muted">{s.english_name} · {s.ayah_count} ayahs</span>
+                  <span className="muted">{s.english_name} · {s.ayah_count} {t("common.ayahs")}</span>
                 </button>
               </li>
             ))}
@@ -253,11 +254,11 @@ function AyahPicker({ onPick }: { onPick: (s: Selection) => void }) {
       ) : (
         <>
           <button className="link" onClick={() => { setSurah(null); setAyahs(null); }}>
-            ← All surahs
+            {t("recite.allSurahs")}
           </button>
           <h2>{surah.name}</h2>
           {ayahs === null ? (
-            <p className="muted">Loading…</p>
+            <p className="muted">{t("common.loading")}</p>
           ) : (
             <ul className="list">
               {ayahs.map((a) => (
@@ -277,7 +278,7 @@ function AyahPicker({ onPick }: { onPick: (s: Selection) => void }) {
                   >
                     <span className="badge">{surah.number}:{a.ayah}</span>
                     <span className="ayah-preview">{a.text}</span>
-                    <span className="muted">{a.sample_count} sample{a.sample_count === 1 ? "" : "s"}</span>
+                    <span className="muted">{a.sample_count} {a.sample_count === 1 ? t("common.sample") : t("common.samples")}</span>
                   </button>
                 </li>
               ))}
@@ -304,7 +305,7 @@ function SurahPicker({ onPick }: { onPick: (s: Selection) => void }) {
     try {
       const ayahs = await api.surahAyahs(s.number);
       const text = ayahs.map((a) => a.text).join(" ");
-      onPick({ scope: "surah", surah: s.number, ayah: null, juz: null, text, label: `Surah ${s.name}` });
+      onPick({ scope: "surah", surah: s.number, ayah: null, juz: null, text, label: `${t("common.surah")} ${s.name}` });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -320,7 +321,7 @@ function SurahPicker({ onPick }: { onPick: (s: Selection) => void }) {
             <button className="list-row" onClick={() => pick(s)} disabled={busy === s.number}>
               <span className="badge">{s.number}</span>
               <span>{s.name}</span>
-              <span className="muted">{s.english_name} · {s.ayah_count} ayahs</span>
+              <span className="muted">{s.english_name} · {s.ayah_count} {t("common.ayahs")}</span>
             </button>
           </li>
         ))}
@@ -344,7 +345,7 @@ function JuzPicker({ onPick }: { onPick: (s: Selection) => void }) {
     try {
       const ayahs = await api.juzAyahs(j.number);
       const text = ayahs.map((a) => a.text).join(" ");
-      onPick({ scope: "juz", surah: null, ayah: null, juz: j.number, text, label: `Juz ${j.number}` });
+      onPick({ scope: "juz", surah: null, ayah: null, juz: j.number, text, label: `${t("common.juz")} ${j.number}` });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -358,9 +359,9 @@ function JuzPicker({ onPick }: { onPick: (s: Selection) => void }) {
         {juzs.map((j) => (
           <li key={j.number}>
             <button className="list-row" onClick={() => pick(j)} disabled={busy === j.number}>
-              <span className="badge">Juz {j.number}</span>
-              <span className="muted">Starts at {j.start_surah}:{j.start_ayah}</span>
-              <span className="muted">{j.ayah_count} ayahs</span>
+              <span className="badge">{t("common.juz")} {j.number}</span>
+              <span className="muted">{t("recite.startsAt")} {j.start_surah}:{j.start_ayah}</span>
+              <span className="muted">{j.ayah_count} {t("common.ayahs")}</span>
             </button>
           </li>
         ))}
@@ -381,12 +382,12 @@ export function MyView({ onBack }: { onBack: () => void }) {
   return (
     <main className="wrap">
       <header className="topbar">
-        <h1>My recordings</h1>
+        <h1>{t("my.title")}</h1>
         <div className="spacer" />
-        <button className="link" onClick={onBack}>Home</button>
+        <button className="link" onClick={onBack}>{t("common.home")}</button>
       </header>
       {items.length === 0 && !error && (
-        <p className="muted">You haven't recorded anything yet.</p>
+        <p className="muted">{t("my.empty")}</p>
       )}
       <ul className="list">
         {items.map((r) => (
@@ -404,8 +405,8 @@ export function MyView({ onBack }: { onBack: () => void }) {
 }
 
 function recitationLabel(r: Recitation): string {
-  if (r.scope === "surah") return `Surah ${r.surah}`;
-  if (r.scope === "juz") return `Juz ${r.juz}`;
+  if (r.scope === "surah") return `${t("common.surah")} ${r.surah}`;
+  if (r.scope === "juz") return `${t("common.juz")} ${r.juz}`;
   return `${r.surah}:${r.ayah}`;
 }
 

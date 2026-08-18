@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Assignment, Selection } from "./types";
 import { api } from "./api";
+import { statusLabel, t } from "./i18n";
 
 export function AssignmentsView({
   onRecite,
@@ -27,18 +28,18 @@ export function AssignmentsView({
   return (
     <main className="wrap">
       <header className="topbar">
-        <h1>Assignments</h1>
+        <h1>{t("nav.assignments")}</h1>
         <div className="spacer" />
-        <button className="link" onClick={onBack}>Home</button>
+        <button className="link" onClick={onBack}>{t("common.home")}</button>
       </header>
-      {items.length === 0 && !error && <p className="muted">No assignments yet.</p>}
+      {items.length === 0 && !error && <p className="muted">{t("assignments.empty")}</p>}
       <ul className="list">
         {items.map((a) => (
           <li key={a.id} className="list-row static">
             <span className="badge">{assignmentLabel(a)}</span>
-            <span className="muted">{a.status}</span>
+            <span className="muted">{statusLabel(a.status)}</span>
             <div className="spacer" />
-            <button className="link" onClick={() => recite(a)}>Recite</button>
+            <button className="link" onClick={() => recite(a)}>{t("assignments.recite")}</button>
           </li>
         ))}
       </ul>
