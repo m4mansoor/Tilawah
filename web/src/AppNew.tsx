@@ -3,8 +3,9 @@ import type { Coverage, QariProfile, Recitation, Selection, Surah, Verse } from 
 import { api, clearToken, getToken, setToken } from "./api";
 import { Brand, Crescent, Footer, NavBar, PageHead, Stat } from "./ui";
 import { getLang, setLang, type Lang } from "./i18n";
+import LandingPage from "./Landing";
 
-type View =
+export type View =
   | "landing" | "login" | "register" | "forgot" | "onboarding"
   | "home" | "browse" | "surah" | "recite" | "recordings" | "assignments"
   | "leaderboard" | "profile" | "learn" | "learnBrowse" | "practice" | "progress"
@@ -71,138 +72,8 @@ export default function App() {
     case "challenge": return <ChallengePage nav={nav} />;
     case "share": return <SharePage nav={nav} />;
     case "home": return <HomePage nav={nav} profile={profile} onRecite={goRecite} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
-    default: return <Landing nav={nav} />;
+    default: return <LandingPage nav={nav} />;
   }
-}
-
-function Landing({ nav }: { nav: (v: View) => void }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const t0 = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - t0) / 1800);
-      setCount(1 - Math.pow(1 - t, 3));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  return (
-    <div style={{ minHeight: "100vh", background: "#06201a", overflowX: "hidden" }}>
-      <div className="topnav">
-        <div className="nav-inner">
-          <a href="#" onClick={(e) => { e.preventDefault(); nav("landing"); }}><Brand /></a>
-          <div className="spacer" />
-          <div className="nav-right" style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700 }}>
-            <a href="#qaris" style={{ color: "rgba(247,241,227,.7)" }}>For Qaris</a>
-            <a href="#learners" style={{ color: "rgba(247,241,227,.7)" }}>For Learners</a>
-            <a href="#mission" style={{ color: "rgba(247,241,227,.7)" }}>Mission</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("donate"); }} style={{ color: "rgba(247,241,227,.7)" }}>Donate</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("login"); }} style={{ color: "rgba(247,241,227,.7)" }}>Sign in</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("register"); }} className="btn btn-md btn-gold">Join free</a>
-          </div>
-        </div>
-      </div>
-
-      <div className="hero-radial" style={{ position: "relative", overflow: "hidden", padding: "110px 28px 90px", textAlign: "center" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div className="ar gold-light" style={{ fontSize: 26, marginBottom: 16 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-          <h1 className="rk" style={{ fontSize: 56, color: "#f7f1e3", margin: "0 0 18px", fontWeight: 600, lineHeight: 1.1 }}>
-            Recite. Learn. Serve the Quran.
-          </h1>
-          <p style={{ color: "rgba(247,241,227,.72)", fontSize: 18, lineHeight: 1.7, maxWidth: 620, margin: "0 auto 34px" }}>
-            Tilawah is an open Quran voice collection — every recitation trains an AI that helps the Ummah perfect its tilawah.
-          </p>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="btn btn-lg btn-gold btn-gold-pulse" onClick={() => nav("register")}>🎙 Start reciting</button>
-            <button className="btn btn-lg btn-ghost" onClick={() => nav("browse")}>Explore surahs</button>
-          </div>
-          <div style={{ display: "flex", gap: 48, justifyContent: "center", marginTop: 64 }}>
-            <Stat value={Math.round(6236 * count).toLocaleString()} label="verses to collect" />
-            <Stat value={Math.round(5 * count)} label="qaris per verse" />
-            <Stat value="114" label="surahs" />
-          </div>
-        </div>
-      </div>
-      <div id="qaris" style={{ maxWidth: 1160, margin: "0 auto", padding: "70px 28px" }}>
-        <h2 className="rk" style={{ fontSize: 34, color: "#f7f1e3", margin: "0 0 20px" }}>Lend your voice</h2>
-        <p style={{ color: "rgba(247,241,227,.65)", fontSize: 16, lineHeight: 1.7, maxWidth: 640 }}>
-          Pick a surah, recite it, and get instant word-by-word feedback — with tajweed rules highlighted. Approved recordings become training data that benefits the whole Ummah.
-        </p>
-        <div className="grid-3" style={{ marginTop: 34 }}>
-          {[
-            ["🎯", "Instant feedback", "Word-level diff against the exact ayah, with makharij and tajweed hints."],
-            ["⭐", "Points & streaks", "Build your streak, climb the leaderboard, and earn badges."],
-            ["🕌", "Serve the Ummah", "Your recitation joins 5 qaris per verse in the open collection."],
-          ].map(([ic, t, d]) => (
-            <div key={t} className="glass-card" style={{ borderRadius: 18, padding: "28px 26px" }}>
-              <div style={{ fontSize: 30, marginBottom: 12 }}>{ic}</div>
-              <div className="rk" style={{ fontWeight: 700, color: "#f7f1e3", marginBottom: 6 }}>{t}</div>
-              <div style={{ fontSize: 13, color: "rgba(247,241,227,.6)", lineHeight: 1.6 }}>{d}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div id="learners" className="hero-radial" style={{ padding: "70px 28px" }}>
-        <div style={{ maxWidth: 1160, margin: "0 auto" }}>
-          <h2 className="rk" style={{ fontSize: 34, color: "#f7f1e3", margin: "0 0 20px" }}>Learn to recite beautifully</h2>
-          <p style={{ color: "rgba(247,241,227,.65)", fontSize: 16, maxWidth: 640, lineHeight: 1.7 }}>
-            Listen to master reciters, practice ayah by ayah, and get live tajweed feedback on your own voice.
-          </p>
-          <div style={{ marginTop: 28, display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <button className="btn btn-md btn-green" onClick={() => nav("learn")}>Open learner dashboard</button>
-            <button className="btn btn-md btn-ghost" onClick={() => nav("practice")}>Try a practice session</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="mission" style={{ maxWidth: 900, margin: "0 auto", padding: "70px 28px", textAlign: "center" }}>
-        <div className="ar gold-light" style={{ fontSize: 22, marginBottom: 14 }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
-        <h2 className="rk" style={{ fontSize: 34, color: "#f7f1e3", margin: "0 0 18px" }}>A community waqf</h2>
-        <p style={{ color: "rgba(247,241,227,.65)", fontSize: 16, lineHeight: 1.7, maxWidth: 620, margin: "0 auto 28px" }}>
-          Tilawah is non-profit. Every donation funds storage, GPU transcription, and review — so the Quran's voice stays open and free forever.
-        </p>
-        <button className="btn btn-lg btn-gold" onClick={() => nav("donate")}>🤲 Support the mission</button>
-      </div>
-
-      <div className="footer">
-        <div className="footer-inner" style={{ display: "block", maxWidth: 1160 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, padding: "10px 0 26px" }}>
-            <div><Brand />
-              <div style={{ fontSize: 13, color: "rgba(247,241,227,.5)", lineHeight: 1.7, maxWidth: 280, marginTop: 14 }}>
-                An open, non-profit Quran voice collection. Recite for the Ummah, learn for a lifetime.
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
-              <div className="eyebrow">Reciters</div>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("browse"); }} style={{ color: "rgba(247,241,227,.6)" }}>Browse surahs</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("challenge"); }} style={{ color: "rgba(247,241,227,.6)" }}>Ramadan challenge</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("leaderboard"); }} style={{ color: "rgba(247,241,227,.6)" }}>Leaderboard</a>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
-              <div className="eyebrow" style={{ color: "var(--green-300)" }}>Learners</div>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("learn"); }} style={{ color: "rgba(247,241,227,.6)" }}>Learner dashboard</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("register"); }} style={{ color: "rgba(247,241,227,.6)" }}>Get started</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("practice"); }} style={{ color: "rgba(247,241,227,.6)" }}>Practice</a>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
-              <div className="eyebrow">Mission</div>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("donate"); }} style={{ color: "rgba(247,241,227,.6)" }}>Donate</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("privacy"); }} style={{ color: "rgba(247,241,227,.6)" }}>Privacy</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); nav("terms"); }} style={{ color: "rgba(247,241,227,.6)" }}>Terms</a>
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "rgba(247,241,227,.4)", borderTop: "1px solid rgba(212,169,74,.15)", paddingTop: 18 }}>
-            <span>© 2026 Tilawah · A community waqf</span>
-            <span className="ar" style={{ fontSize: 15, color: "rgba(212,169,74,.7)" }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function AuthShell({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
