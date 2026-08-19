@@ -29,7 +29,7 @@ android {
         val keystorePropertiesFile = rootProject.file("keystore.properties")
         if (keystorePropertiesFile.exists()) {
             create("release") {
-                val keystoreProperties = java.util.Properties().apply {
+                val keystoreProperties = Properties().apply {
                     load(FileInputStream(keystorePropertiesFile))
                 }
                 keyAlias = keystoreProperties["keyAlias"] as String
