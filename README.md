@@ -19,9 +19,19 @@ word-by-word tajweed feedback.
 - A **platform** (web) + **apps** (Tauri desktop & mobile) that listen to you recite the Quran.
 - A **public API** for developers (see [API](#api) below).
 
-## 📥 Try it
-- **App & platform:** https://tilawah.me
-- **Desktop + Android installers:** [Releases](https://github.com/m4mansoor/open-quran-engine/releases)
+## 🛠️ Build your own app — the whole point
+
+This is an **engine**, not just an app. The core is the correction API; anyone can
+build their own Quran app on top of it:
+
+1. **Run the engine** (see [Quickstart](#quickstart)).
+2. **Call the API** — POST audio to `/v1/correct`, get back the transcript, matched
+   verse, word-by-word corrections, and tajweed rules (see [API](#api)).
+3. **Build your client** — web, mobile, desktop. See the example app in
+   [`examples/tilawah-app`](examples/tilawah-app).
+
+**Tilawah** (https://tilawah.me) is one such client — a free, non-profit app for
+**Quran Learners** and **Quran Reciters (Qaris)**.
 
 ## Architecture (production-ready)
 See [`docs/architecture.md`](docs/architecture.md) for the full design.
@@ -55,8 +65,8 @@ open-quran-engine/
 │   ├── requirements.txt
 │   └── scripts/              # convert_model.sh, train_whisper.py, eval_model.py, segment.py, export_data.py, backup.sh
 ├── web/             # Qari web dashboard (Vite + React) - served by Caddy
-├── apps/
-│   └── desktop/     # Tauri v2 app (React + TS) → Windows/macOS/Android/iOS
+├── examples/
+│   └── tilawah-app/ # Tauri v2 app (React + TS) — an example client
 ├── docs/
 │   ├── architecture.md
 │   ├── deployment.md
@@ -119,8 +129,8 @@ whole Quran before fine-tuning Whisper. Recordings are private (each Qari sees o
 their own); only aggregate counts are shared.
 
 Two frontends share one API:
-- `web/` - the Qari dashboard, served by Caddy at `tilawah.me`.
-- `apps/desktop` - the Tauri correction app (desktop/mobile).
+- `web/` - the Qari dashboard (reference platform), served at `tilawah.me`.
+- `examples/tilawah-app` - the Tauri correction app (desktop/mobile), an example client.
 
 ## Testing
 
@@ -137,18 +147,18 @@ npm run dev &                      # one shell
 npx playwright test                # another shell
 ```
 
-## Tauri app (Windows / macOS / Android / iOS)
+## Example app (Tilawah — Tauri desktop & mobile)
+
+A reference client lives in [`examples/tilawah-app`](examples/tilawah-app). It records
+your mic (natively via cpal) and calls `/v1/correct` to show corrections + tajweed rules.
 
 ```bash
-cd apps/desktop
+cd examples/tilawah-app
 npm install
 npm run tauri dev          # desktop (Windows/macOS/Linux)
 npm run tauri android dev  # Android (requires Android SDK + NDK)
 npm run tauri ios dev      # iOS (requires macOS + Xcode)
 ```
-
-Release installers for all platforms are built in GitHub Actions
-(`.github/workflows/release.yml`) whenever a `v*` tag is pushed.
 
 ## Deploy to production (tilawah.me)
 
@@ -163,6 +173,7 @@ docker compose up -d --build   # builds API + web dashboard; Caddy serves HTTPS
 ```
 
 ## Model & licensing
+- **Code:** MIT License — see [`LICENSE`](LICENSE).
 - **ASR model:** `MaddoggProduction/whisper-l-v3-turbo-quran-lora-dataset-mix` - Apache-2.0, converted to CTranslate2 int8 (`quran-ct2`).
 - **Reference text:** Tanzil Quran (public domain), shipped as `server/app/data/quran.json`.
 - See [`docs/NOTICES.md`](docs/NOTICES.md) for the required attribution.

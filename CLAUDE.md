@@ -18,7 +18,7 @@ mic capture -> ASR (Whisper, Quran-tuned) -> fuzzy verse match -> word diff + ta
 - `web/` — React web platform.
   - `src/Landing.tsx` (landing), `src/AppNew.tsx` (main app router), `src/theme.css`.
   - Other views: `ReciteView.tsx`, `AssignmentsView.tsx`, `AdminView.tsx`, `widgets.tsx`, `ui.tsx`.
-- `apps/desktop/` — **Tauri v2** app (React frontend + Rust shell in `src-tauri/`).
+- `examples/tilawah-app/` — **Tauri v2** app (React frontend + Rust shell in `src-tauri/`) — an example client.
   - Records mic natively via cpal (`start_recording`/`stop_recording` Tauri commands in
     `src-tauri/src/lib.rs` → base64 16-bit mono WAV), with MediaRecorder fallback in browser.
   - POSTs `/v1/correct` (`API_URL` = `VITE_API_URL` or `http://localhost:8010`).
@@ -61,4 +61,4 @@ mic capture -> ASR (Whisper, Quran-tuned) -> fuzzy verse match -> word diff + ta
 - Web build: `cd web && npm run build`
 - Web dev:   `cd web && npm run dev`  (uses `web/.env.development` → `http://localhost:8010`)
 - Server:    `cd server && uvicorn app.main:app --port 8000` / tests: `pytest`
-- Desktop:   `cd apps/desktop && npm run tauri dev` (or `npm run dev` for browser-only)
+- Desktop:   `cd examples/tilawah-app && npm run tauri dev` (or `npm run dev` for browser-only)
