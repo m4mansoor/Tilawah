@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 // Correction engine URL. Override at build time with VITE_API_URL.
 const API_URL: string =
   (import.meta as any).env?.VITE_API_URL ?? "http://localhost:8010";
+
+// True when running inside the Tauri shell (native mic capture available).
+const isTauri =
+  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 // Authentic Islamic content shown while a recitation is being analyzed.
 const TEACHINGS = [
@@ -75,6 +80,7 @@ function App() {
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [nativeMode, setNativeMode] = useState(false);
 
   // Rotate through Islamic teachings while analyzing.
   useEffect(() => {
@@ -104,28 +110,41 @@ function App() {
     setError(null);
     setResult(null);
     try {
+      if (isTauri) {
+        await invoke("start_recording");
+        setNativeMode(true);
+        setRecording(true);
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       chunksRef.current = [];
       recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, {
-          type: recorder.mimeType || "audio/webm",
-        });
-        await submit(blob);
+        await submit(new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" }));
       };
       recorderRef.current = recorder;
       recorder.start();
+      setNativeMode(false);
       setRecording(true);
     } catch {
       setError("Microphone access was denied. Please allow microphone access.");
     }
   }
 
-  function stopRecording() {
-    recorderRef.current?.stop();
+  async function stopRecording() {
     setRecording(false);
+    if (nativeMode) {
+      try {
+        const base64 = await invoke<string>("stop_recording");
+        await submitBase64(base64);
+      } catch (e) {
+        setError("Could not stop recording: " + (e as Error).message);
+      }
+      return;
+    }
+    recorderRef.current?.stop();
   }
 
   function reset() {
@@ -133,10 +152,9 @@ function App() {
     setError(null);
   }
 
-  async function submit(blob: Blob) {
+  async function submitBase64(base64: string) {
     setBusy(true);
     try {
-      const base64 = await blobToBase64(blob);
       const res = await fetch(`${API_URL}/v1/correct`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,6 +167,10 @@ function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function submit(blob: Blob) {
+    await submitBase64(await blobToBase64(blob));
   }
 
   const teaching = TEACHINGS[teachingIndex];
