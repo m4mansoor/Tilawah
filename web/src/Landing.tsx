@@ -214,7 +214,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
           {([
             { head: "Reciters", color: "#d4a94a", links: [["browse", "Browse surahs"], ["challenge", "Ramadan challenge"], ["leaderboard", "Leaderboard"], ["review", "Become a reviewer"]] as [View, string][] },
             { head: "Learners", color: "#8fd4b4", links: [["learn", "Learner dashboard"], ["register", "Get started"], ["surah", "Explore Al-Fatihah"]] as [View, string][] },
-            { head: "Mission", color: "#d4a94a", links: [["donate", "Donate"], ["privacy", "Privacy"], ["terms", "Terms"]] as [View, string][] },
+            { head: "Mission", color: "#d4a94a", links: [["donate", "Donate"], ["about", "About"], ["privacy", "Privacy"], ["terms", "Terms"]] as [View, string][] },
           ]).map(({ head, color, links }) => (
             <div key={head} style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
               <div className="rk" style={{ fontWeight: 700, fontSize: 12, letterSpacing: ".2em", textTransform: "uppercase", color, marginBottom: 4 }}>{head}</div>

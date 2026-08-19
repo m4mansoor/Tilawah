@@ -4,12 +4,13 @@ import { api, clearToken, getToken, setToken } from "./api";
 import { Brand, Crescent, Footer, NavBar, PageHead, Stat } from "./ui";
 import { getLang, setLang, type Lang } from "./i18n";
 import LandingPage from "./Landing";
+import AboutPage from "./About";
 
 export type View =
   | "landing" | "login" | "register" | "forgot" | "onboarding"
   | "home" | "browse" | "surah" | "recite" | "recordings" | "assignments"
   | "leaderboard" | "profile" | "learn" | "learnBrowse" | "practice" | "progress"
-  | "review" | "donate" | "privacy" | "terms" | "challenge" | "share";
+  | "review" | "donate" | "privacy" | "terms" | "challenge" | "share" | "about";
 
 const QARI_LINKS = [
   { label: "Browse", key: "browse" },
@@ -71,6 +72,7 @@ export default function App() {
     case "terms": return <LegalPage nav={nav} kind="terms" />;
     case "challenge": return <ChallengePage nav={nav} />;
     case "share": return <SharePage nav={nav} />;
+    case "about": return <AboutPage nav={nav} />;
     case "home": return <HomePage nav={nav} profile={profile} onRecite={goRecite} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
     default: return <LandingPage nav={nav} />;
   }
