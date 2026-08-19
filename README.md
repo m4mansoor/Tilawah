@@ -1,15 +1,27 @@
-# Tilawah (تِلاوَة) - AI Quran Recitation Corrector
+# Open Quran Engine 🕌
 
-Tilawah listens to Quran recitation, recognizes the words, and points out
-recitation and Tajweed mistakes - word by word - so anyone can recite with confidence.
+**Open-source AI Quran engine** — listen, correct, and teach Quran recitation with
+word-by-word tajweed feedback.
 
-> **Working title:** Tilawah (Arabic تِلاوَة, "recitation"). Started as "Quran Corrector".
+> This is the open-source engine behind **Tilawah** (Arabic تِلاوَة, "recitation") — a
+> free, non-profit platform + app for **Quran Learners** and **Quran Reciters (Qaris)**.
+
+## 🎙️ For Qaris · 📖 For Learners — two ways to serve the Quran
+- **Qaris (reciters)** lend their voice — recite verses and contribute clean recordings
+  to a growing "waqf of sound" collection.
+- **Learners** get instant, gentle feedback — every word compared and corrected, with the
+  tajweed rules for that verse.
 
 ## What it is
-- A **platform** (web) + **apps** (Tauri desktop & mobile) that listen to you recite the Quran.
 - An **AI engine** (fine-tuned Whisper ASR) that transcribes your recitation with diacritics.
 - A **correction engine** that diffs your recitation against the exact text of the ayah
-  and highlights wrong / missing / extra words and Tajweed issues.
+  and highlights wrong / missing / extra words and **tajweed** issues.
+- A **platform** (web) + **apps** (Tauri desktop & mobile) that listen to you recite the Quran.
+- A **public API** for developers (see [API](#api) below).
+
+## 📥 Try it
+- **App & platform:** https://tilawah.me
+- **Desktop + Android installers:** [Releases](https://github.com/m4mansoor/open-quran-engine/releases)
 
 ## Architecture (production-ready)
 See [`docs/architecture.md`](docs/architecture.md) for the full design.
@@ -22,7 +34,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full design.
 
 ## Repository layout
 ```
-tilawah/
+open-quran-engine/
 ├── server/          # FastAPI engine (runs on the Hostinger KVM4 VPS)
 │   ├── app/
 │   │   ├── main.py        # API (/health, /v1/correct, /v1/auth/*)
@@ -145,7 +157,7 @@ see [`docs/deployment.md`](docs/deployment.md).
 
 ```bash
 # on the VPS
-git clone https://github.com/m4mansoor/Tilawah.git && cd Tilawah
+git clone https://github.com/m4mansoor/open-quran-engine.git && cd open-quran-engine
 cp .env.example .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_EMAILS
 docker compose up -d --build   # builds API + web dashboard; Caddy serves HTTPS
 ```

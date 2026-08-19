@@ -1,4 +1,4 @@
-# CLAUDE.md — Tilawah (AI Quran Recitation Corrector)
+# CLAUDE.md — Open Quran Engine (powers the Tilawah app)
 
 ## What this project is
 Tilawah — an open, non-profit platform + apps that **listen to a person reciting the
@@ -41,7 +41,7 @@ mic capture -> ASR (Whisper, Quran-tuned) -> fuzzy verse match -> word diff + ta
   `SHA256:Cgc+towJpXLzDI0sxjmNbgT8i3lJDMRhEt0uWJYDMpA`, no passphrase).
   `~/.ssh/id_ed25519` (comment `tilawah-deploy`, `SHA256:ZNTF...`) is passphrase-locked
   and `~/.ssh/spt_deploy` (`spt-deploy-20260708`) belongs to a DIFFERENT project.
-- GitHub remote: `https://github.com/m4mansoor/Tilawah.git`.
+- GitHub remote: `https://github.com/m4mansoor/open-quran-engine.git` (renamed from `Tilawah`; the consumer app stays branded **Tilawah**).
 
 ## Current development state
 - DONE: landing page rebuilt faithfully to `_redesign/Landing v2.dc.html` (commit `ed57047`).
