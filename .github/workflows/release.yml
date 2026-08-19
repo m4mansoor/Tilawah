@@ -15,15 +15,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: windows-latest
+          - name: windows-x64
+            platform: windows-latest
             args: ""
             rust_targets: "x86_64-pc-windows-msvc"
-          - platform: macos-latest
+            bundle_glob: |
+              apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+              apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+          - name: macos-aarch64
+            platform: macos-latest
             args: "--target aarch64-apple-darwin"
             rust_targets: "aarch64-apple-darwin"
-          - platform: macos-latest
+            bundle_glob: |
+              apps/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          - name: macos-x64
+            platform: macos-latest
             args: "--target x86_64-apple-darwin"
             rust_targets: "x86_64-apple-darwin"
+            bundle_glob: |
+              apps/desktop/src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -40,17 +50,15 @@ jobs:
         working-directory: apps/desktop
         run: npm ci
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build (Tauri)
+        working-directory: apps/desktop
+        run: npm run tauri build -- ${{ matrix.args }}
+
+      - uses: actions/upload-artifact@v4
         with:
-          tagName: tilawah-v__VERSION__
-          releaseName: "Tilawah v__VERSION__"
-          releaseBody: "See the assets below to download and install this version."
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
-          projectPath: apps/desktop
+          name: tilawah-${{ matrix.name }}
+          path: ${{ matrix.bundle_glob }}
+          if-no-files-found: error
 
   build-android:
     runs-on: ubuntu-latest
@@ -77,11 +85,6 @@ jobs:
         working-directory: apps/desktop
         run: npm ci
 
-      # Generates src-tauri/gen/android (commit it to keep builds reproducible).
-      - name: Initialize Android project
-        working-directory: apps/desktop
-        run: npm run tauri android init
-
       - name: Build Android (.aab / .apk)
         working-directory: apps/desktop
         run: npm run tauri android build
@@ -91,35 +94,27 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-  build-ios:
-    runs-on: macos-latest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tilawah-android
+          path: |
+            apps/desktop/src-tauri/gen/android/app/build/outputs/bundle/release/*.aab
+            apps/desktop/src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+  release:
+    needs: [build-desktop, build-android]
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/download-artifact@v4
         with:
-          node-version: 22
+          path: artifacts
+          merge-multiple: true
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: List artifacts
+        run: find artifacts -type f
+
+      - uses: softprops/action-gh-release@v2
         with:
-          targets: aarch64-apple-ios,aarch64-apple-ios-sim,x86_64-apple-ios
-
-      - name: Install frontend dependencies
-        working-directory: apps/desktop
-        run: npm ci
-
-      # Generates src-tauri/gen/ios (commit it to keep builds reproducible).
-      - name: Initialize iOS project
-        working-directory: apps/desktop
-        run: npm run tauri ios init
-
-      - name: Build iOS (.ipa)
-        working-directory: apps/desktop
-        run: npm run tauri ios build
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          files: artifacts/**/*
+          generate_release_notes: true
