@@ -1,5 +1,6 @@
 import { Brand, Footer } from "./ui";
 import type { View } from "./AppNew";
+import { pathForView } from "./router";
 
 const WHY = [
   { icon: "🕋", title: "For Huffadh", text: "Empowers Huffadh to maintain and strengthen their memorization with consistent, structured revision." },
@@ -29,19 +30,27 @@ export default function AboutPage({ nav }: { nav: (v: View) => void }) {
 
       <div className="topnav" style={{ background: "transparent", borderBottom: "1px solid rgba(212,169,74,.3)" }}>
         <div className="nav-inner">
-          <a href="#" onClick={(e) => { e.preventDefault(); nav("landing"); }}><Brand /></a>
+          <a href={pathForView("landing")} onClick={(e) => { e.preventDefault(); nav("landing"); }}><Brand /></a>
           <div className="spacer" />
-          <a href="#" onClick={(e) => { e.preventDefault(); nav("landing"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Back</a>
+          <a href={pathForView("landing")} onClick={(e) => { e.preventDefault(); nav("landing"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Back</a>
         </div>
       </div>
 
-      <div style={{ position: "relative", zIndex: 5, maxWidth: 900, margin: "0 auto", padding: "72px 28px 8px", textAlign: "center" }}>
+      <div style={{ position: "relative", zIndex: 5, maxWidth: 900, margin: "0 auto", padding: "clamp(48px, 10vw, 72px) 20px 8px", textAlign: "center" }}>
         <div className="ar" style={{ fontSize: 26, color: "var(--gold-300)", marginBottom: 16 }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
         <div className="rk" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(212,169,74,.12)", border: "1px solid rgba(212,169,74,.4)", borderRadius: 99, padding: "7px 18px", fontSize: 13, fontWeight: 700, color: "#f0d488" }}>✦ Open-source · Non-profit · For the whole ummah</div>
-        <h1 className="rk" style={{ fontSize: 58, color: "#f7f1e3", margin: "20px 0 12px", fontWeight: 600, lineHeight: 1.1 }}>
+        <h1 className="rk" style={{ fontSize: "clamp(34px, 8vw, 58px)", color: "#f7f1e3", margin: "20px 0 12px", fontWeight: 600, lineHeight: 1.1 }}>
           About <span style={{ background: "var(--gold-grad)", WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" }}>Tilawah</span>
         </h1>
         <p style={{ fontSize: 19, color: "rgba(247,241,227,.72)", margin: 0 }}>Built by <span className="rk" style={{ fontWeight: 700, color: "#f0d488" }}>Inaamul Haq Mansoor</span> — Founder &amp; Developer</p>
+      </div>
+
+      <div style={{ position: "relative", zIndex: 5, maxWidth: 760, margin: "0 auto", padding: "40px 28px 0", textAlign: "center" }}>
+        <div style={{ position: "relative", display: "inline-block", width: "100%", maxWidth: 620, borderRadius: 24, padding: 6, background: "var(--gold-grad)", boxShadow: "0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(212,169,74,.35), 0 0 60px rgba(212,169,74,.22)" }}>
+          <div style={{ borderRadius: 19, overflow: "hidden", background: "#06201a", lineHeight: 0 }}>
+            <img src="/img/tilawah-hero.png" alt="Tilawah" style={{ display: "block", width: "100%", height: "auto", objectFit: "cover" }} />
+          </div>
+        </div>
       </div>
 
       <div style={{ position: "relative", zIndex: 5, maxWidth: 760, margin: "0 auto", padding: "44px 28px 0" }}>
@@ -57,7 +66,7 @@ export default function AboutPage({ nav }: { nav: (v: View) => void }) {
       </div>
       <div style={{ position: "relative", zIndex: 5, maxWidth: 1000, margin: "0 auto", padding: "70px 28px 0" }}>
         <div className="rk" style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".2em", color: "#f0d488", textAlign: "center", textTransform: "uppercase" }}>The Vision</div>
-        <h2 className="rk" style={{ fontSize: 38, color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>Why I built Tilawah</h2>
+        <h2 className="rk" style={{ fontSize: "clamp(28px, 5.5vw, 38px)", color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>Why I built Tilawah</h2>
         <p style={{ color: "rgba(247,241,227,.68)", fontSize: 16, lineHeight: 1.8, maxWidth: 720, margin: "0 auto 34px", textAlign: "center" }}>
           Tilawah was born from a simple yet powerful vision: to make Quran learning and revision{" "}
           <em>accessible, engaging, and effective</em> for every Qari and learner, everywhere. 🌍
@@ -75,7 +84,7 @@ export default function AboutPage({ nav }: { nav: (v: View) => void }) {
 
       <div style={{ position: "relative", zIndex: 5, maxWidth: 1000, margin: "0 auto", padding: "70px 28px 0" }}>
         <div className="rk" style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".2em", color: "#8fd4b4", textAlign: "center", textTransform: "uppercase" }}>Under the hood</div>
-        <h2 className="rk" style={{ fontSize: 38, color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>The technology behind Tilawah</h2>
+        <h2 className="rk" style={{ fontSize: "clamp(28px, 5.5vw, 38px)", color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>The technology behind Tilawah</h2>
         <p style={{ color: "rgba(247,241,227,.68)", fontSize: 16, lineHeight: 1.8, maxWidth: 760, margin: "0 auto 34px", textAlign: "center" }}>
           At the heart of Tilawah lies the <strong style={{ color: "#f7f1e3" }}>Open Quran Engine</strong> — an open-source
           project I developed to listen to Quran recitation, recognize every word, and correct it with precise tajweed feedback,
@@ -93,7 +102,7 @@ export default function AboutPage({ nav }: { nav: (v: View) => void }) {
       </div>
       <div style={{ position: "relative", zIndex: 5, maxWidth: 1000, margin: "0 auto", padding: "70px 28px 0" }}>
         <div className="rk" style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".2em", color: "#f0d488", textAlign: "center", textTransform: "uppercase" }}>For Qaris &amp; Learners</div>
-        <h2 className="rk" style={{ fontSize: 38, color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>Key features</h2>
+        <h2 className="rk" style={{ fontSize: "clamp(28px, 5.5vw, 38px)", color: "#f7f1e3", textAlign: "center", margin: "12px 0 14px", fontWeight: 600 }}>Key features</h2>
         <p style={{ color: "rgba(247,241,227,.68)", fontSize: 16, lineHeight: 1.8, maxWidth: 720, margin: "0 auto 34px", textAlign: "center" }}>
           Whether you're a Qari looking to perfect your recitation, a Hafidh maintaining your hifdh, or a beginner taking
           your first steps with the Quran — Tilawah is designed for you.

@@ -1,5 +1,6 @@
 import type {
   Assignment,
+  CorrectionResult,
   Coverage,
   Juz,
   LeaderboardEntry,
@@ -66,6 +67,11 @@ export const api = {
   juzList: () => request<Juz[]>("/v1/juz"),
   juzAyahs: (n: number) => request<Verse[]>(`/v1/juz/${n}`),
   nextVerse: () => request<Verse>("/v1/qari/next-verse"),
+  correct: (surah: number, ayah: number, audio_base64: string) =>
+    request<CorrectionResult>("/v1/correct", {
+      method: "POST",
+      body: JSON.stringify({ surah, ayah, audio_base64 }),
+    }),
   submit: (
     scope: string,
     surah: number | null,

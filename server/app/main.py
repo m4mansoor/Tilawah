@@ -37,7 +37,7 @@ from .security import create_access_token, hash_password, verify_password
 from .tajweed import diff_words
 from .tajweed_rules import detect_tajweed
 from .trainer import router as trainer_router
-from .verse_match import find_best_reference
+from .verse_match import find_best_reference, similarity
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -228,6 +228,26 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
             "Try reciting a complete verse slowly and clearly."
         )
 
+    # Feedback score + human summary (used by the learner practice flow).
+    match_score = None
+    summary = None
+    if reference_text and transcript.strip():
+        match_score = similarity(transcript, reference_text)
+        if not errors:
+            summary = "No mistakes detected. Masha'Allah!"
+        else:
+            subs = sum(1 for e in errors if e["error_type"] == "substitution")
+            dels = sum(1 for e in errors if e["error_type"] == "deletion")
+            ins = sum(1 for e in errors if e["error_type"] == "insertion")
+            parts = []
+            if subs:
+                parts.append(f"{subs} substitution{'s' if subs != 1 else ''}")
+            if dels:
+                parts.append(f"{dels} deletion{'s' if dels != 1 else ''}")
+            if ins:
+                parts.append(f"{ins} insertion{'s' if ins != 1 else ''}")
+            summary = ", ".join(parts) + " detected."
+
     return CorrectionResponse(
         status="ok",
         transcript=transcript,
@@ -236,4 +256,6 @@ def correct(req: CorrectionRequest) -> CorrectionResponse:
         note=note,
         errors=errors,
         tajweed=tajweed,
+        match_score=match_score,
+        summary=summary,
     )

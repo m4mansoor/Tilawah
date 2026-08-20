@@ -1,5 +1,6 @@
 // Shared design-system components for the Tilawah redesign.
 import type { ReactNode } from "react";
+import { pathForView } from "./router";
 
 export function Crescent({ size = 40, green = false }: { size?: number; green?: boolean }) {
   return (
@@ -43,14 +44,14 @@ export function NavBar(props: {
   return (
     <div className={learn ? "topnav learn" : "topnav"}>
       <div className="nav-inner">
-        <a href="#" onClick={(e) => { e.preventDefault(); onNav(learn ? "learn" : "home"); }}>
+        <a href={pathForView(learn ? "learn" : "home")} onClick={(e) => { e.preventDefault(); onNav(learn ? "learn" : "home"); }}>
           <Brand green={learn} subtitle={learn ? "Learn mode" : "Tilawah"} />
         </a>
         <div className="nav-links">
           {links.map((l) => (
             <a
               key={l.key}
-              href="#"
+              href={pathForView(l.key)}
               onClick={(e) => { e.preventDefault(); onNav(l.key); }}
               className={active === l.key ? (learn ? "active green" : "active") : ""}
             >
@@ -66,7 +67,7 @@ export function NavBar(props: {
           )}
           {user && (
             <>
-              <a href="#" onClick={(e) => { e.preventDefault(); onNav("profile"); }} className={active === "profile" ? "nav-user active" : "nav-user"}>
+              <a href={pathForView("profile")} onClick={(e) => { e.preventDefault(); onNav("profile"); }} className={active === "profile" ? "nav-user active" : "nav-user"}>
                 {user}
               </a>
               {(points !== undefined || streak !== undefined) && (
@@ -91,9 +92,9 @@ export function Footer(props: { learn?: boolean; onNav: (key: any) => void }) {
       <div className="footer-inner">
         <span>Tilawah · {props.learn ? "Learn for a lifetime" : "Recite for the Ummah"}</span>
         <div className="footer-links">
-          <a href="#" onClick={(e) => { e.preventDefault(); props.onNav("privacy"); }}>Privacy</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); props.onNav("terms"); }}>Terms</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); props.onNav("donate"); }}>Donate</a>
+          <a href={pathForView("privacy")} onClick={(e) => { e.preventDefault(); props.onNav("privacy"); }}>Privacy</a>
+          <a href={pathForView("terms")} onClick={(e) => { e.preventDefault(); props.onNav("terms"); }}>Terms</a>
+          <a href={pathForView("donate")} onClick={(e) => { e.preventDefault(); props.onNav("donate"); }}>Donate</a>
         </div>
         <span className="footer-ar">وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</span>
       </div>

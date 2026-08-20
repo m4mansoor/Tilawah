@@ -48,6 +48,17 @@ mic capture -> ASR (Whisper, Quran-tuned) -> fuzzy verse match -> word diff + ta
 - DONE: full web platform (auth, qari mode, learner mode), server engine, Tauri scaffold.
 - DONE: **deployed web changes to VPS** (Landing.tsx + AppNew.tsx + theme.css + full
   `web/src` synced via scp; rebuilt `tilawah-web` only; verified live at tilawah.me).
+- DONE: **mobile responsiveness pass** — converted fixed-width inline grids to
+  `repeat(auto-fit, minmax(…))`, large inline headings to `clamp()`, and added
+  nav/footer/pagehead/auth media queries + `.hide-sm`/`.loop-grid` helpers in
+  `theme.css` (900/720/640px breakpoints). Deployed live (bundle `index-C3vosoPN.js`
+  / `index-xulbU2aG.css`).
+- DONE: **wired registration + learner mode + verse audio** — registration now saves
+  `tajweed_level` (was silently dropped) and removed the fake "Country" field; the
+  learner Practice flow (listen → repeat → feedback) is real (EveryAyah CDN audio via
+  `playVerse()`, mic recording → `POST /v1/correct` which now returns `match_score`
+  and `summary`); Browse/Surah rows gained a ▶ Listen button; SharePage shows the real
+  score. Deployed `web` + `api` (bundle `index-RXpTKTGz.js`).
 - NOTE: ASR uses `ASR_BACKEND=modal` (L4 GPU, `server/modal/asr_app.py`). The worker has
   NO `keep_warm` → scales to zero; cold start ~30-60s after ~5 min idle, warm ~1.5s.
   User chose to keep it serverless (accept cold start) — leave `keep_warm` OFF.

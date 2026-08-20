@@ -5,6 +5,8 @@ import { Brand, Crescent, Footer, NavBar, PageHead, Stat } from "./ui";
 import { getLang, setLang, type Lang } from "./i18n";
 import LandingPage from "./Landing";
 import AboutPage from "./About";
+import PracticeFlow from "./PracticeFlow";
+import { pathForView, pathToView, PUBLIC_VIEWS } from "./router";
 
 export type View =
   | "landing" | "login" | "register" | "forgot" | "onboarding"
@@ -25,23 +27,102 @@ const LEARN_LINKS = [
   { label: "My progress", key: "progress" },
 ];
 
+// Verse audio (EveryAyah — the open recitation dataset this project credits).
+// File format: {surah}{ayah} padded to 3 digits, e.g. 001005.mp3 = Al-Fatihah:5.
+function verseAudioUrl(surah: number, ayah: number, folder: string): string {
+  const s = String(surah).padStart(3, "0");
+  const a = String(ayah).padStart(3, "0");
+  return `https://everyayah.com/data/${folder}/${s}${a}.mp3`;
+}
+
+let _audio: HTMLAudioElement | null = null;
+function playVerse(surah: number, ayah: number, folder: string, onChange: (f: string | null) => void) {
+  if (_audio) { _audio.pause(); _audio = null; }
+  const audio = new Audio(verseAudioUrl(surah, ayah, folder));
+  _audio = audio;
+  onChange(folder);
+  audio.onended = () => { onChange(null); _audio = null; };
+  audio.onerror = () => { onChange(null); _audio = null; };
+  audio.play().catch(() => { onChange(null); _audio = null; });
+}
+function stopVerse() { if (_audio) { _audio.pause(); _audio = null; } }
+
 export default function App() {
-  const [view, setView] = useState<View>("landing");
+  const [view, setView] = useState<View>(() => pathToView(window.location.pathname).view as View);
   const [profile, setProfile] = useState<QariProfile | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [lang, setLangState] = useState<Lang>(getLang());
+  const [share, setShare] = useState<{ score: number; verse: string; label: string } | null>(null);
 
+  // Reconstruct a deep-linked surah (e.g. /surah/1) into a selection.
+  const openSurahByNumber = (n: number) => {
+    api.surahs()
+      .then((list) => {
+        const s = list.find((x) => x.number === n);
+        if (s) {
+          setSelection({ scope: "surah", surah: s.number, ayah: null, juz: null, text: "", label: s.name });
+          setView("surah");
+        } else {
+          setView("browse");
+        }
+      })
+      .catch(() => setView("browse"));
+  };
+
+  // First-load bootstrap: honour the URL (deep links + refresh) and auth.
   useEffect(() => {
+    const initial = pathToView(window.location.pathname);
+    if (initial.view === "surah" && initial.surah) openSurahByNumber(initial.surah);
+
     if (getToken()) {
       api.getProfile()
-        .then((p) => { setProfile(p); setView(p.consent_ok ? "home" : "onboarding"); })
+        .then((p) => {
+          setProfile(p);
+          if (!p.consent_ok) { setView("onboarding"); return; }
+          // Keep "logged-in landing -> dashboard", but never override a deep
+          // link to a public page such as /about or /privacy.
+          if (initial.view === "landing" || initial.view === "login" || initial.view === "register" || initial.view === "forgot") {
+            setView("home");
+          }
+        })
         .catch(() => { clearToken(); setView("landing"); });
+    } else if (!PUBLIC_VIEWS.includes(initial.view)) {
+      setView("landing");
     }
+  }, []);
+
+  // Keep the address bar in sync with the view + reset scroll on navigation.
+  useEffect(() => {
+    const path = pathForView(view, selection?.surah);
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, "", path);
+    }
+    window.scrollTo(0, 0);
+  }, [view, selection]);
+
+  // Handle the browser back / forward buttons.
+  useEffect(() => {
+    const onPop = () => {
+      const r = pathToView(window.location.pathname);
+      if (r.view === "surah" && r.surah) {
+        openSurahByNumber(r.surah);
+      } else {
+        setSelection(null);
+        setView(r.view as View);
+      }
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   const nav = (v: View) => setView(v);
   const goRecite = (s: Selection) => { setSelection(s); setView("recite"); };
   const goSurah = (s: Surah) => { setSelection({ scope: "surah", surah: s.number, ayah: null, juz: null, text: "", label: s.name }); setView("surah"); };
+  const startPractice = (surah: number, ayah: number) => {
+    setSelection({ scope: "ayah", surah, ayah, juz: null, text: "", label: `${surah}:${ayah}` });
+    setView("practice");
+  };
   const toggleLang = () => { const n = lang === "en" ? "ar" : "en"; setLang(n); setLangState(n); };
   const logout = () => { clearToken(); setProfile(null); setView("landing"); };
   const onAuthed = async () => {
@@ -62,16 +143,16 @@ export default function App() {
     case "assignments": return <AssignmentsPage nav={nav} profile={profile} onRecite={goRecite} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
     case "leaderboard": return <LeaderboardPage nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
     case "profile": return <ProfilePage nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
-    case "learn": return <LearnHome nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
-    case "learnBrowse": return <LearnBrowse nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} onPractice={() => setView("practice")} />;
-    case "practice": return <PracticePage nav={nav} />;
+    case "learn": return <LearnHome nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} onPractice={() => startPractice(1, 1)} />;
+    case "learnBrowse": return <LearnBrowse nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} onPractice={(n) => startPractice(n, 1)} />;
+    case "practice": return selection ? <PracticeFlow nav={nav} sel={selection} onShare={(s) => { setShare(s); setView("share"); }} /> : <LearnHome nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} onPractice={() => startPractice(1, 1)} />;
     case "progress": return <ProgressPage nav={nav} profile={profile} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
     case "review": return <ReviewPage nav={nav} />;
     case "donate": return <DonatePage nav={nav} />;
     case "privacy": return <LegalPage nav={nav} kind="privacy" />;
     case "terms": return <LegalPage nav={nav} kind="terms" />;
     case "challenge": return <ChallengePage nav={nav} />;
-    case "share": return <SharePage nav={nav} />;
+    case "share": return <SharePage nav={nav} share={share} />;
     case "about": return <AboutPage nav={nav} />;
     case "home": return <HomePage nav={nav} profile={profile} onRecite={goRecite} lang={lang} onToggleLang={toggleLang} onLogout={logout} />;
     default: return <LandingPage nav={nav} />;
@@ -143,7 +224,7 @@ function RegisterPage({ nav, onAuthed }: { nav: (v: View) => void; onAuthed: () 
   const [error, setError] = useState("");
   async function submit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError("");
-    try { const r = await api.register(email, password, name); setToken(r.access_token); await api.updateProfile({ level }); await onAuthed(); }
+    try { const r = await api.register(email, password, name); setToken(r.access_token); await api.updateProfile({ tajweed_level: level }); await onAuthed(); }
     catch (err) { setError((err as Error).message); }
     finally { setBusy(false); }
   }
@@ -154,10 +235,7 @@ function RegisterPage({ nav, onAuthed }: { nav: (v: View) => void; onAuthed: () 
         <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "0 0 8px" }}>Create your account</h1>
         <p style={{ fontSize: 13, color: "rgba(247,241,227,.6)", lineHeight: 1.6, margin: "0 0 26px" }}>Lend your voice to the Quran collection — every recitation counts.</p>
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
-          <div className="grid-2">
-            <div><div className="field-label">Full name</div><input className="input" placeholder="Inaam Ahmed" value={name} onChange={(e) => setName(e.target.value)} /></div>
-            <div><div className="field-label">Country</div><input className="input" placeholder="Pakistan" /></div>
-          </div>
+          <div><div className="field-label">Full name</div><input className="input" placeholder="Inaam Ahmed" value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><div className="field-label">Email</div><input className="input" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           <div><div className="field-label">Password</div><input className="input" type="password" required placeholder="8+ characters" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
           <div>
@@ -325,14 +403,14 @@ function HomePage({ nav, profile, onRecite, lang, onToggleLang, onLogout }: { na
 
       <div className="pagehead" style={{ textAlign: "center" }}>
         <div className="pattern-overlay" />
-        <div className="inner" style={{ padding: "84px 28px 80px" }}>
+        <div className="inner" style={{ padding: "clamp(48px, 10vw, 84px) 20px 80px" }}>
           <div className="ar" style={{ fontSize: 30, color: "var(--gold-500)", marginBottom: 12 }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
           <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "0 0 12px" }}>Every verse counts</h1>
           <p style={{ color: "rgba(247,241,227,.65)", fontSize: 15, maxWidth: 440, margin: "0 auto 30px", lineHeight: 1.65 }}>6,236 verses. 5 qaris each. Your voice brings the collection one recitation closer.</p>
           <button className="btn btn-lg btn-gold btn-gold-pulse" disabled={busy} onClick={reciteNext}>{busy ? "Finding…" : "🎙 Start reciting"}</button>
         </div>
       </div>
-      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "50px 28px", display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
+      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "50px 28px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {coverage && (
             <div className="card" style={{ padding: "30px 34px" }}>
@@ -341,7 +419,7 @@ function HomePage({ nav, profile, onRecite, lang, onToggleLang, onLogout }: { na
                 <span className="pill pill-gold">{Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}% complete</span>
               </div>
               <div className="bar"><div className="bar-fill" style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }} /></div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginTop: 22 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16, marginTop: 22 }}>
                 <Stat value={coverage.approved_samples} label="Approved" />
                 <Stat value={coverage.covered_ayahs} label="Verses covered" />
                 <Stat value={coverage.complete_ayahs} label="Fully collected" />
@@ -406,7 +484,7 @@ function BrowsePage({ nav, profile, onOpenSurah, lang, onToggleLang, onLogout }:
       <PageHead>
         <div className="center" style={{ maxWidth: 640, margin: "0 auto" }}>
           <div className="ar" style={{ fontSize: 24, color: "var(--gold-500)", marginBottom: 8 }}>ٱقْرَأْ بِٱسْمِ رَبِّكَ</div>
-          <h1 className="rk" style={{ fontSize: 40, color: "#f7f1e3", margin: "0 0 10px" }}>Browse the Quran</h1>
+          <h1 className="rk" style={{ fontSize: "clamp(30px, 6vw, 40px)", color: "#f7f1e3", margin: "0 0 10px" }}>Browse the Quran</h1>
           <p style={{ color: "rgba(247,241,227,.65)", fontSize: 15, margin: "0 0 24px" }}>114 surahs · 6,236 verses — find the verse that needs your voice.</p>
           <input className="input" placeholder="Search surah…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ maxWidth: 420, margin: "0 auto" }} />
         </div>
@@ -435,13 +513,14 @@ const SURAH_NAMES: Record<number, string> = { 1: "الفاتحة", 2: "البق�
 
 function SurahPage({ nav, sel, onRecite, profile, lang, onToggleLang, onLogout }: { nav: (v: View) => void; sel: Selection; onRecite: (s: Selection) => void; profile: QariProfile | null; lang: Lang; onToggleLang: () => void; onLogout: () => void }) {
   const [ayahs, setAyahs] = useState<Verse[]>([]);
+  const [playingKey, setPlayingKey] = useState<string | null>(null);
   useEffect(() => { if (sel.surah) api.surahAyahs(sel.surah).then(setAyahs).catch(() => {}); }, [sel.surah]);
   return (
     <div className="surface-light">
       <NavBar links={QARI_LINKS} active="browse" onNav={nav} user={profile?.name || profile?.email} points={profile?.points} streak={profile?.streak} onLogout={onLogout} onToggleLang={onToggleLang} lang={lang} />
       <PageHead>
         <div className="center" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div className="ar" style={{ fontSize: 40, color: "var(--gold-500)", marginBottom: 8 }}>{SURAH_NAMES[sel.surah || 1] || "سورة"}</div>
+          <div className="ar" style={{ fontSize: "clamp(30px, 7vw, 40px)", color: "var(--gold-500)", marginBottom: 8 }}>{SURAH_NAMES[sel.surah || 1] || "سورة"}</div>
           <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "0 0 8px" }}>{sel.label}</h1>
           <div style={{ color: "rgba(247,241,227,.6)", fontSize: 13 }}>{ayahs.length} verses · target 5 qaris per verse</div>
         </div>
@@ -456,6 +535,7 @@ function SurahPage({ nav, sel, onRecite, profile, lang, onToggleLang, onLogout }
             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
               {[0, 1, 2, 3, 4].map((j) => <span key={j} className={`slot ${j < (a.sample_count || 0) ? "slot-gold" : "slot-empty"}`} />)}
             </div>
+            <button className="btn btn-sm btn-ghost" onClick={() => { const key = `${a.surah}:${a.ayah}`; if (playingKey === key) { stopVerse(); setPlayingKey(null); } else playVerse(a.surah, a.ayah, "Alafasy_128kbps", (f) => setPlayingKey(f ? key : null)); }}>{playingKey === `${a.surah}:${a.ayah}` ? "⏸ Stop" : "▶ Listen"}</button>
             <button className="btn btn-sm btn-dark" onClick={() => onRecite({ scope: "ayah", surah: sel.surah, ayah: a.ayah, juz: null, text: a.text, label: `${sel.surah}:${a.ayah}` })}>🎙 Recite</button>
           </div>
         ))}
@@ -480,8 +560,28 @@ function RecitePage({ nav, sel }: { nav: (v: View) => void; sel: Selection }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Recitation | null>(null);
   const [error, setError] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const [phase, setPhase] = useState(0);
   const recRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+
+  const STAGES = ["Uploading your recitation…", "Transcribing with AI…", "Matching to the verse…", "Checking tajweed rules…"];
+  const TIPS = ["وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا", "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", "إِنَّ مَعَ الْعُسْرِ يُسْرًا"];
+
+  useEffect(() => {
+    if (!recording) return;
+    setElapsed(0);
+    const t0 = Date.now();
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - t0) / 1000)), 500);
+    return () => clearInterval(id);
+  }, [recording]);
+
+  useEffect(() => {
+    if (!busy) { setPhase(0); return; }
+    const id = setInterval(() => setPhase((p) => (p + 1) % STAGES.length), 2400);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy]);
 
   async function start() {
     setError(""); setResult(null);
@@ -504,56 +604,103 @@ function RecitePage({ nav, sel }: { nav: (v: View) => void; sel: Selection }) {
   }
   function stop() { recRef.current?.stop(); setRecording(false); }
 
+  const score = result?.match_score != null ? Math.round(result.match_score * 100) : null;
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
   return (
     <div className="surface-dark" style={{ display: "flex", flexDirection: "column" }}>
       <div className="pattern-overlay" />
-      <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <a href="#" onClick={(e) => { e.preventDefault(); nav("browse"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Browse</a>
+      <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+        <a href="#" onClick={(e) => { e.preventDefault(); nav("browse"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.9)" }}>← Browse</a>
         <div className="center">
           <div className="rk" style={{ fontSize: 18, fontWeight: 700, color: "#f7f1e3" }}>{sel.label}</div>
-          <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(247,241,227,.5)", fontWeight: 700 }}>Recite slowly & clearly</div>
+          <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(247,241,227,.85)", fontWeight: 700 }}>Recite slowly & clearly</div>
         </div>
-        <a href="#" onClick={(e) => { e.preventDefault(); nav("home"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>Home</a>
+        <a href="#" onClick={(e) => { e.preventDefault(); nav("home"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.9)" }}>Home</a>
       </div>
 
-      <div style={{ position: "relative", zIndex: 5, flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 28px 40px" }}>
+      <div style={{ position: "relative", zIndex: 5, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: "10px 28px 40px" }}>
+        <div className="glass-card arch-card-sm fade-up" style={{ maxWidth: 860, width: "100%", padding: "26px 30px" }}>
+          <div className="pill pill-gold" style={{ marginBottom: 12 }}>{sel.label}</div>
+          <div className="ar" style={{ fontSize: "clamp(28px, 6vw, 40px)", lineHeight: 1.9, color: "#f7f1e3", direction: "rtl" }}>{sel.text}</div>
+        </div>
+
         {!result ? (
-          <div className="center fade-up" style={{ maxWidth: 860, width: "100%" }}>
-            <div className="glass-card arch-card-sm" style={{ padding: "48px 40px 34px", marginBottom: 30 }}>
-              <div className="pill pill-gold" style={{ marginBottom: 18 }}>{sel.label}</div>
-              <div className="ar" style={{ fontSize: 40, lineHeight: 1.9, color: "#f7f1e3", direction: "rtl" }}>{sel.text}</div>
-            </div>
-            <button className="crescent" style={{ width: 92, height: 92, cursor: "pointer", fontSize: 34, background: recording ? "linear-gradient(135deg,#e05252,#f08c8c)" : "var(--gold-grad)", position: "relative" }} onClick={recording ? stop : start}>
-              <span>{recording ? "◼" : "🎙"}</span>
-            </button>
-            <div className="rk" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: recording ? "var(--red-light)" : "rgba(247,241,227,.55)", marginTop: 18 }}>
-              {busy ? "Analyzing…" : recording ? "Recording… tap to stop" : "Tap to record"}
-            </div>
-            {error && <div style={{ color: "var(--red-light)", marginTop: 14, fontSize: 14 }}>{error}</div>}
-          </div>
-        ) : (
-          <div className="glass-card fade-up" style={{ maxWidth: 720, width: "100%", padding: "38px 44px", borderRadius: 24 }}>
-            <div className="center" style={{ marginBottom: 22 }}>
-              <div style={{ fontSize: 44 }}>🌙</div>
-              <h2 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "8px 0" }}>JazakAllah khair!</h2>
-              <div className="rk" style={{ fontSize: 34, fontWeight: 700, color: "var(--gold-300)" }}>
-                {result.match_score != null ? Math.round(result.match_score * 100) + "%" : "—"}
+          busy ? (
+            <div className="center fade-up" style={{ maxWidth: 560, width: "100%" }}>
+              <div style={{ position: "relative", width: 92, height: 92, margin: "0 auto 26px" }}>
+                <span style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid rgba(212,169,74,.5)", animation: "ringPulse 1.8s ease-out infinite" }} />
+                <span style={{ position: "absolute", inset: 12, borderRadius: "50%", border: "2px solid rgba(212,169,74,.35)", animation: "ringPulse 1.8s ease-out .6s infinite" }} />
+                <div style={{ position: "absolute", inset: 18, borderRadius: "50%", background: "var(--gold-grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🌙</div>
               </div>
-              <p className="mut" style={{ fontSize: 14 }}>{result.summary || "Keep going — every recitation counts."}</p>
+              <h2 className="rk" style={{ fontSize: 24, color: "#f7f1e3", margin: "0 0 6px" }}>{STAGES[phase]}</h2>
+              <p style={{ fontSize: 14, color: "rgba(247,241,227,.85)", margin: "0 0 24px" }}>First checks can take a little longer — hang tight.</p>
+              <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 26 }}>
+                {STAGES.map((s, i) => (
+                  <span key={s} style={{ width: i === phase ? 26 : 8, height: 8, borderRadius: 99, background: i === phase ? "var(--gold-500)" : "rgba(247,241,227,.15)", transition: "all .3s" }} />
+                ))}
+              </div>
+              <div className="glass-card" style={{ padding: "18px 22px", borderRadius: 16 }}>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>While you wait</div>
+                <div className="ar" style={{ fontSize: 20, color: "var(--gold-300)", direction: "rtl", lineHeight: 1.9 }}>{TIPS[phase % TIPS.length]}</div>
+              </div>
             </div>
-            {result.errors && result.errors.length > 0 && (
+          ) : (
+            <div className="center fade-up" style={{ maxWidth: 860, width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 6, height: 40, marginBottom: 22 }}>
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                  <span key={i} style={{ width: 5, height: "100%", borderRadius: 99, background: recording ? "var(--gold-grad)" : "rgba(247,241,227,.15)", transformOrigin: "bottom", animation: recording ? `eq 1s ease-in-out ${i * 0.1}s infinite` : "none" }} />
+                ))}
+              </div>
+
+              <div style={{ position: "relative", width: 96, height: 96, margin: "0 auto" }}>
+                {recording && <span style={{ position: "absolute", inset: -6, borderRadius: "50%", border: "2px solid var(--red-light)", animation: "ringPulse 1.6s ease-out infinite" }} />}
+                <button className="crescent" style={{ width: 96, height: 96, cursor: "pointer", fontSize: 34, background: recording ? "linear-gradient(135deg,#e05252,#f08c8c)" : "var(--gold-grad)", position: "relative", animation: recording ? "glowPulse 2s ease-in-out infinite" : "none" }} onClick={recording ? stop : start}>
+                  <span>{recording ? "◼" : "🎙"}</span>
+                </button>
+              </div>
+
+              <div className="rk" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: recording ? "var(--red-light)" : "rgba(247,241,227,.85)", marginTop: 20 }}>
+                {recording ? `${fmt(elapsed)} · Recording… tap to stop` : "Tap to record"}
+              </div>
+              <div style={{ fontSize: 14, color: "rgba(247,241,227,.8)", marginTop: 8 }}>{recording ? "Recite slowly and clearly — every word will be checked." : "Allow microphone access, then recite the verse above."}</div>
+              {error && <div style={{ color: "var(--red-light)", marginTop: 14, fontSize: 14 }}>{error}</div>}
+            </div>
+          )
+        ) : (
+          <div className="glass-card fade-up" style={{ maxWidth: 760, width: "100%", padding: "34px 40px", borderRadius: 24 }}>
+            <div className="center" style={{ marginBottom: 22 }}>
+              <div style={{ width: 96, height: 96, margin: "0 auto 14px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 30, background: score != null && score >= 90 ? "var(--green-grad)" : score != null && score >= 60 ? "var(--gold-grad)" : "linear-gradient(135deg,#e05252,#f08c8c)", color: score != null ? "var(--green-950)" : "#f7f1e3", boxShadow: "0 12px 34px rgba(201,153,43,.35)" }}>
+                {score != null ? `${score}%` : "—"}
+              </div>
+              <h2 className="rk" style={{ fontSize: 26, color: "#f7f1e3", margin: "0 0 6px" }}>JazakAllah khair!</h2>
+              <p style={{ fontSize: 14, color: "rgba(247,241,227,.85)", maxWidth: 440, margin: "0 auto", lineHeight: 1.6 }}>{result.summary || "Keep going — every recitation counts."}</p>
+            </div>
+
+            {result.transcript && (
+              <div style={{ marginBottom: 18, background: "rgba(247,241,227,.04)", border: "1px solid rgba(212,169,74,.25)", borderRadius: 14, padding: "14px 18px" }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>What we heard</div>
+                <div className="ar" style={{ fontSize: 20, color: "rgba(247,241,227,.85)", direction: "rtl", lineHeight: 1.9 }}>{result.transcript}</div>
+              </div>
+            )}
+
+            {result.errors && result.errors.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {result.errors.slice(0, 8).map((e, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
-                    <span className="pill pill-gold" style={{ textTransform: "none", letterSpacing: 0 }}>{e.error_type}</span>
-                    {e.expected && <b style={{ color: "#f7f1e3" }}>{e.expected}</b>}
-                    {e.expected && e.recognized && <span style={{ color: "rgba(247,241,227,.4)" }}>→</span>}
-                    {e.recognized && <span style={{ color: "var(--red-light)" }}>{e.recognized}</span>}
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, background: "rgba(247,241,227,.04)", borderRadius: 10, padding: "8px 12px", flexWrap: "wrap" }}>
+                    <span className={e.error_type === "deletion" ? "pill pill-red" : e.error_type === "insertion" ? "pill pill-green" : "pill pill-gold"} style={{ textTransform: "none", letterSpacing: 0 }}>{e.error_type}</span>
+                    {e.expected && <b className="ar" style={{ color: "#f7f1e3", fontSize: 16 }}>{e.expected}</b>}
+                    {e.expected && e.recognized && <span style={{ color: "rgba(247,241,227,.7)" }}>→</span>}
+                    {e.recognized && <span className="ar" style={{ color: "var(--red-light)", fontSize: 16 }}>{e.recognized}</span>}
                   </div>
                 ))}
               </div>
+            ) : (
+              <div className="center" style={{ padding: "8px 0 2px", color: "var(--green-300)", fontSize: 14, fontWeight: 700 }}>✓ No mistakes detected — Masha'Allah!</div>
             )}
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24 }}>
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
+              <button className="btn btn-md btn-ghost" onClick={() => { setResult(null); setError(""); }}>🔁 Recite again</button>
               <button className="btn btn-md btn-gold" onClick={() => nav("recordings")}>View recordings</button>
               <button className="btn btn-md btn-ghost" onClick={() => nav("home")}>Done</button>
             </div>
@@ -738,7 +885,7 @@ function ReviewPage({ nav }: { nav: (v: View) => void }) {
   return (
     <div className="surface-dark" style={{ display: "flex", flexDirection: "column" }}>
       <div className="pattern-overlay" />
-      <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <a href="#" onClick={(e) => { e.preventDefault(); nav("home"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Home</a>
         <div className="center">
           <div className="rk" style={{ fontSize: 18, fontWeight: 700, color: "#f7f1e3" }}>Review queue <span className="ar" style={{ color: "var(--gold-500)", fontSize: 22, marginLeft: 6 }}>المراجعة</span></div>
@@ -775,7 +922,7 @@ function ReviewPage({ nav }: { nav: (v: View) => void }) {
   );
 }
 
-function LearnHome({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v: View) => void; profile: QariProfile | null; lang: Lang; onToggleLang: () => void; onLogout: () => void }) {
+function LearnHome({ nav, profile, lang, onToggleLang, onLogout, onPractice }: { nav: (v: View) => void; profile: QariProfile | null; lang: Lang; onToggleLang: () => void; onLogout: () => void; onPractice: () => void }) {
   const path = ["بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ", "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", "مَـٰلِكِ يَوْمِ ٱلدِّينِ", "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ", "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ"];
   return (
     <div className="surface-light">
@@ -786,7 +933,7 @@ function LearnHome({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v: Vi
           <div className="eyebrow" style={{ color: "var(--green-400)" }}>Learn mode</div>
           <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "8px 0 10px" }}>Master Al-Fatihah</h1>
           <p style={{ color: "rgba(247,241,227,.65)", fontSize: 15 }}>Listen, repeat, and get live tajweed feedback — one ayah at a time.</p>
-          <button className="btn btn-lg btn-green" onClick={() => nav("practice")}>Continue learning →</button>
+          <button className="btn btn-lg btn-green" onClick={onPractice}>Continue learning →</button>
         </div>
       </PageHead>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "44px 28px 70px" }}>
@@ -809,7 +956,7 @@ function LearnHome({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v: Vi
   );
 }
 
-function LearnBrowse({ nav, profile, lang, onToggleLang, onLogout, onPractice }: { nav: (v: View) => void; profile: QariProfile | null; lang: Lang; onToggleLang: () => void; onLogout: () => void; onPractice: () => void }) {
+function LearnBrowse({ nav, profile, lang, onToggleLang, onLogout, onPractice }: { nav: (v: View) => void; profile: QariProfile | null; lang: Lang; onToggleLang: () => void; onLogout: () => void; onPractice: (surah: number) => void }) {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   useEffect(() => { api.surahs().then(setSurahs).catch(() => {}); }, []);
   return (
@@ -826,7 +973,7 @@ function LearnBrowse({ nav, profile, lang, onToggleLang, onLogout, onPractice }:
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 28px 70px" }}>
         <div className="grid-3">
           {surahs.filter((s) => [1, 93, 94, 97, 103, 105, 106, 108, 110, 112, 113, 114].includes(s.number)).map((s) => (
-            <a key={s.number} href="#" onClick={(e) => { e.preventDefault(); onPractice(); }} className="card card-hover" style={{ padding: "20px 22px", display: "flex", alignItems: "center", gap: 16, color: "inherit" }}>
+            <a key={s.number} href="#" onClick={(e) => { e.preventDefault(); onPractice(s.number); }} className="card card-hover" style={{ padding: "20px 22px", display: "flex", alignItems: "center", gap: 16, color: "inherit" }}>
               <div className="diamond" style={{ background: "linear-gradient(135deg,#e3f2ea,#f3faf6)", border: "1px solid rgba(24,122,94,.35)" }}><span style={{ color: "var(--green-500)" }}>{s.number}</span></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800, fontSize: 15, color: "var(--ink-dark)" }}>{s.name}</div>
@@ -838,66 +985,6 @@ function LearnBrowse({ nav, profile, lang, onToggleLang, onLogout, onPractice }:
         </div>
       </div>
       <Footer onNav={nav} learn />
-    </div>
-  );
-}
-
-function PracticePage({ nav }: { nav: (v: View) => void }) {
-  const [step, setStep] = useState(1);
-  const voices = ["Mishary Rashid Alafasy", "Abdul Basit Abdus-Samad", "Mahmoud Khalil Al-Husary", "Muhammad Siddiq Al-Minshawi", "Abdur-Rahman As-Sudais"];
-  return (
-    <div className="surface-dark" style={{ display: "flex", flexDirection: "column" }}>
-      <div className="pattern-overlay-green" />
-      <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <a href="#" onClick={(e) => { e.preventDefault(); nav("learnBrowse"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Browse & learn</a>
-        <div className="center">
-          <div className="rk" style={{ fontSize: 18, fontWeight: 700, color: "#f7f1e3" }}>Practice · Al-Fatihah <span className="ar" style={{ color: "var(--green-300)", fontSize: 22, marginLeft: 6 }}>الفاتحة</span></div>
-          <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(247,241,227,.5)", fontWeight: 700 }}>Step {step} of 3</div>
-        </div>
-        <a href="#" onClick={(e) => { e.preventDefault(); nav("progress"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>My progress</a>
-      </div>
-      <div className="center" style={{ position: "relative", zIndex: 5, padding: "16px 28px 0" }}>
-        <div className="ar" style={{ fontSize: 42, lineHeight: 2, color: "#f7f1e3", direction: "rtl" }}>إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
-        <p style={{ color: "rgba(247,241,227,.62)", fontSize: 15, fontStyle: "italic", margin: "14px auto 0", maxWidth: 480 }}>"It is You we worship and You we ask for help."</p>
-      </div>
-      <div style={{ position: "relative", zIndex: 5, flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 28px 30px" }}>
-        {step === 1 && (
-          <div className="fade-up" style={{ width: "100%", maxWidth: 680 }}>
-            <div className="rk center" style={{ fontSize: 12, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--green-300)", fontWeight: 700, marginBottom: 18 }}>Step 1 · Listen</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {voices.map((v, i) => (
-                <button key={v} onClick={() => setStep(2)} style={{ background: i === 0 ? "rgba(46,163,128,.16)" : "rgba(247,241,227,.05)", border: `1px solid ${i === 0 ? "var(--green-300)" : "rgba(143,212,180,.3)"}`, borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", color: "#f7f1e3", fontFamily: "var(--font-body)" }}>
-                  <span className="avatar" style={{ width: 36, height: 36, background: "var(--green-grad)", color: "#f7f1e3", fontSize: 16 }}>{v[0]}</span>
-                  <span style={{ flex: 1, textAlign: "left", fontWeight: 700, fontSize: 14 }}>{v}</span>
-                  <span className="rk" style={{ color: "var(--green-300)" }}>▶</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        {step === 2 && (
-          <div className="center fade-up" style={{ maxWidth: 560 }}>
-            <div className="rk" style={{ fontSize: 12, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--green-300)", fontWeight: 700, marginBottom: 18 }}>Step 2 · Repeat</div>
-            <button className="crescent crescent-green" style={{ width: 92, height: 92, cursor: "pointer", fontSize: 34 }} onClick={() => setStep(3)}><span>🎙</span></button>
-            <div className="rk" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(247,241,227,.5)", marginTop: 16 }}>Tap the mic and recite</div>
-          </div>
-        )}
-        {step === 3 && (
-          <div className="center fade-up" style={{ maxWidth: 560 }}>
-            <div className="rk" style={{ fontSize: 12, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--green-300)", fontWeight: 700, marginBottom: 18 }}>Step 3 · Feedback</div>
-            <div style={{ fontSize: 46, marginBottom: 12 }}>✅</div>
-            <div className="rk" style={{ fontSize: 26, fontWeight: 600, color: "#f7f1e3", marginBottom: 6 }}>Masha'Allah — 94% accurate</div>
-            <p className="mut" style={{ fontSize: 14, marginBottom: 24 }}>Your "نَعْبُدُ" was crisp. Watch the madd on "إِيَّاكَ" — stretch it a little longer.</p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-              <button className="btn btn-md btn-ghost" onClick={() => nav("share")}>🎉 Share this win</button>
-              <button className="btn btn-md btn-green" onClick={() => nav("learn")}>✓ Finish lesson</button>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="center" style={{ position: "relative", zIndex: 5, display: "flex", justifyContent: "center", gap: 10, padding: "0 0 28px" }}>
-        {[1, 2, 3].map((n) => <span key={n} style={{ width: 34, height: 5, borderRadius: 99, background: step >= n ? "var(--green-grad)" : "rgba(247,241,227,.15)" }} />)}
-      </div>
     </div>
   );
 }
@@ -920,7 +1007,7 @@ function ProgressPage({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v:
           </div>
         </div>
       </PageHead>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "44px 28px 70px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "44px 28px 70px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
         <div className="card" style={{ padding: "28px 30px" }}>
           <h2 className="rk" style={{ fontSize: 20, color: "var(--ink-dark)", margin: "0 0 18px" }}>Surah progress</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -967,7 +1054,7 @@ function DonatePage({ nav }: { nav: (v: View) => void }) {
       <div style={{ position: "relative", zIndex: 5, maxWidth: 800, margin: "0 auto", padding: "64px 28px 40px", textAlign: "center" }}>
         <div style={{ fontSize: 44, marginBottom: 14, animation: "floatY 6s ease-in-out infinite", display: "inline-block" }}>🤲</div>
         <div className="ar" style={{ fontSize: 24, color: "var(--gold-500)", marginBottom: 10 }}>مَنْ ذَا الَّذِي يُقْرِضُ اللَّهَ قَرْضًا حَسَنًا</div>
-        <h1 className="rk" style={{ fontSize: 44, color: "#f7f1e3", margin: "0 0 14px" }}>Help the Quran reach every ear</h1>
+        <h1 className="rk" style={{ fontSize: "clamp(30px, 7vw, 44px)", color: "#f7f1e3", margin: "0 0 14px" }}>Help the Quran reach every ear</h1>
         <p style={{ color: "rgba(247,241,227,.7)", fontSize: 16, lineHeight: 1.7, maxWidth: 560, margin: "0 auto 30px" }}>Your donation keeps the collection open, funds GPU transcription, and pays our reviewers.</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
           {[5, 10, 25, 50, 100, 250].map((v) => (
@@ -1031,7 +1118,7 @@ function ChallengePage({ nav }: { nav: (v: View) => void }) {
       <div style={{ position: "relative", zIndex: 5, maxWidth: 840, margin: "0 auto", padding: "64px 28px 44px", textAlign: "center" }}>
         <div style={{ fontSize: 52, marginBottom: 14, animation: "floatY 6s ease-in-out infinite", display: "inline-block" }}>🌙</div>
         <div className="eyebrow">Ramadan 2026</div>
-        <h1 className="rk" style={{ fontSize: 44, color: "#f7f1e3", margin: "10px 0 14px" }}>Recite Juz Amma in 30 days</h1>
+        <h1 className="rk" style={{ fontSize: "clamp(30px, 7vw, 44px)", color: "#f7f1e3", margin: "10px 0 14px" }}>Recite Juz Amma in 30 days</h1>
         <p style={{ color: "rgba(247,241,227,.7)", fontSize: 16, maxWidth: 560, margin: "0 auto" }}>One short surah a day. Complete the challenge to earn the Juz Amma badge and 500 bonus points.</p>
         <div className="grid-3" style={{ marginTop: 30 }}>
           {[["30", "days"], ["21", "remaining"], ["2,415", "reciters joined"]].map(([v, l]) => (
@@ -1045,7 +1132,7 @@ function ChallengePage({ nav }: { nav: (v: View) => void }) {
             <span className="rk" style={{ fontSize: 16, fontWeight: 700, color: "#f7f1e3" }}>🔥 Your streak — day 8</span>
             <span style={{ fontSize: 12, color: "rgba(247,241,227,.55)", fontWeight: 700 }}>1 streak freeze available ❄️</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(15,1fr)", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(38px, 1fr))", gap: 8 }}>
             {days.map((n) => (
               <div key={n} style={{ aspectRatio: "1", borderRadius: 8, background: n <= 8 ? "var(--gold-grad)" : n === 9 ? "rgba(212,169,74,.2)" : "transparent", border: n <= 8 ? "none" : n === 9 ? "1px dashed var(--gold-500)" : "1px solid rgba(212,169,74,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: n <= 8 ? "var(--green-950)" : "rgba(247,241,227,.4)" }}>{n}</div>
             ))}
@@ -1063,17 +1150,20 @@ function ChallengePage({ nav }: { nav: (v: View) => void }) {
   );
 }
 
-function SharePage({ nav }: { nav: (v: View) => void }) {
+function SharePage({ nav, share }: { nav: (v: View) => void; share: { score: number; verse: string; label: string } | null }) {
+  const score = share?.score ?? 0;
+  const verse = share?.verse || "";
+  const label = share?.label || "";
   return (
     <div className="surface-dark" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
       <div className="pattern-overlay" />
       <div className="glass-card arch-card-sm fade-up" style={{ maxWidth: 460, width: "100%", margin: 28, padding: "48px 40px 40px", textAlign: "center" }}>
         <div style={{ fontSize: 46, marginBottom: 12 }}>🎉</div>
         <div className="eyebrow">Share your win</div>
-        <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "8px 0 8px" }}>Masha'Allah — 94%!</h1>
-        <p className="mut" style={{ fontSize: 14, marginBottom: 24 }}>You nailed Ayah 5 of Al-Fatihah.</p>
+        <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "8px 0 8px" }}>Masha'Allah — {score}%!</h1>
+        <p className="mut" style={{ fontSize: 14, marginBottom: 24 }}>You nailed {label || "your ayah"}.</p>
         <div className="glass-card" style={{ borderRadius: 16, padding: "20px", marginBottom: 24 }}>
-          <div className="ar" style={{ fontSize: 26, color: "var(--gold-300)", direction: "rtl" }}>إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
+          <div className="ar" style={{ fontSize: 26, color: "var(--gold-300)", direction: "rtl" }}>{verse}</div>
           <div className="mut" style={{ fontSize: 12, marginTop: 8 }}>tilawah.me · Recite for the Ummah</div>
         </div>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

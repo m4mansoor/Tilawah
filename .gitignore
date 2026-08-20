@@ -29,3 +29,7 @@ Thumbs.db
 *.tar.gz
 _redesign/
 *.zip
+
+# Playwright MCP artifacts + stray screenshots
+.playwright-mcp/
+landing-top.png

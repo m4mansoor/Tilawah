@@ -47,6 +47,9 @@ class CorrectionResponse(BaseModel):
     note: str | None = None
     errors: list[WordError] = []
     tajweed: list[TajweedRule] = []
+    # Feedback score (0..1) + human summary for the learner practice flow.
+    match_score: float | None = None
+    summary: str | None = None
 
 
 class TajweedRule(BaseModel):

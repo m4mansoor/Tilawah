@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { View } from "./AppNew";
 import { Brand } from "./ui";
+import { pathForView } from "./router";
 
 const MARQUEE = ["الفاتحة", "البقرة", "آل عمران", "يس", "الرحمن", "الواقعة", "الملك", "النبأ", "الضحى", "القدر", "الإخلاص", "الفلق", "الناس"];
 
@@ -23,15 +24,15 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
       {/* NAV */}
       <div className="topnav" style={{ background: "rgba(6,32,26,.85)", backdropFilter: "blur(14px)", borderBottom: "1px solid rgba(212,169,74,.3)" }}>
         <div className="nav-inner" style={{ maxWidth: 1280, padding: "16px 32px" }}>
-          <a href="#" onClick={(e) => { e.preventDefault(); nav("landing"); }}><Brand /></a>
+          <a href={pathForView("landing")} onClick={(e) => { e.preventDefault(); nav("landing"); }}><Brand /></a>
           <div className="spacer" />
-          <div className="nav-right" style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, gap: 22 }}>
-            <a href="#qaris" style={{ color: "rgba(247,241,227,.7)" }}>For Qaris</a>
-            <a href="#learners" style={{ color: "rgba(247,241,227,.7)" }}>For Learners</a>
-            <a href="#loop" style={{ color: "rgba(247,241,227,.7)" }}>Mission</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("donate"); }} style={{ color: "rgba(247,241,227,.7)" }}>Donate</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("login"); }} style={{ color: "rgba(247,241,227,.7)" }}>Sign in</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); nav("register"); }} className="btn btn-md btn-gold">Join free</a>
+          <div className="nav-right" style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, gap: 22, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <a href="#qaris" className="hide-sm" style={{ color: "rgba(247,241,227,.7)" }}>For Qaris</a>
+            <a href="#learners" className="hide-sm" style={{ color: "rgba(247,241,227,.7)" }}>For Learners</a>
+            <a href="#loop" className="hide-sm" style={{ color: "rgba(247,241,227,.7)" }}>Mission</a>
+            <a href={pathForView("donate")} onClick={(e) => { e.preventDefault(); nav("donate"); }} style={{ color: "rgba(247,241,227,.7)" }}>Donate</a>
+            <a href={pathForView("login")} onClick={(e) => { e.preventDefault(); nav("login"); }} style={{ color: "rgba(247,241,227,.7)" }}>Sign in</a>
+            <a href={pathForView("register")} onClick={(e) => { e.preventDefault(); nav("register"); }} className="btn btn-md btn-gold">Join free</a>
           </div>
         </div>
       </div>
@@ -50,7 +51,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#8fd4b4" }} />
             <span className="rk" style={{ fontSize: 13, fontWeight: 700, color: "#f0d488" }}>Open-source · Non-profit · For the whole ummah</span>
           </div>
-          <h1 className="rk" style={{ fontSize: 66, lineHeight: 1.12, margin: "0 0 10px", fontWeight: 600 }}>
+          <h1 className="rk" style={{ fontSize: "clamp(34px, 8vw, 66px)", lineHeight: 1.12, margin: "0 0 10px", fontWeight: 600 }}>
             One Quran.<br />
             <span style={{ background: "linear-gradient(90deg,#d4a94a,#f5e3a8,#d4a94a)", backgroundSize: "200% auto", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", animation: "shimmer 4s linear infinite" }}>Two ways to serve it.</span>
           </h1>
@@ -58,7 +59,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
             Qaris lend their voices to build the world's first open Quran recitation collection — and every Muslim, from a child sounding out their first surah to a grandmother perfecting tajweed, learns from it free, forever.
           </p>
           {/* DUAL PATH CARDS */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24, maxWidth: 900, margin: "0 auto" }}>
             <a href="#qaris" style={{ display: "block", textAlign: "left", background: "linear-gradient(180deg,rgba(212,169,74,.16),rgba(212,169,74,.05))", border: "1px solid rgba(212,169,74,.6)", borderRadius: "150px 150px 22px 22px", padding: "52px 36px 32px", color: "#f7f1e3" }}>
               <div style={{ width: 60, height: 60, borderRadius: "50%", background: "var(--gold-grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 20px" }}>🎙</div>
               <div className="rk center" style={{ fontSize: 13, letterSpacing: ".24em", textTransform: "uppercase", color: "#d4a94a", fontWeight: 700, marginBottom: 8 }}>I am a reciter</div>
@@ -76,7 +77,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
           </div>
 
           {/* COUNTER STRIP */}
-          <div style={{ margin: "56px auto 60px", maxWidth: 900, display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 1, background: "rgba(212,169,74,.35)", border: "1px solid rgba(212,169,74,.35)", borderRadius: 20, overflow: "hidden" }}>
+          <div style={{ margin: "56px auto 60px", maxWidth: 900, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 1, background: "rgba(212,169,74,.35)", border: "1px solid rgba(212,169,74,.35)", borderRadius: 20, overflow: "hidden" }}>
             <div className="center" style={{ background: "#0a352b", padding: 24 }}><div className="rk" style={{ fontSize: 36, fontWeight: 700, color: "#f0d488" }}>{Math.round(6236 * count).toLocaleString()}</div><div style={{ fontSize: 12, fontWeight: 700, color: "rgba(247,241,227,.55)", letterSpacing: ".08em", textTransform: "uppercase" }}>Verses to collect</div></div>
             <div className="center" style={{ background: "#0a352b", padding: 24 }}><div className="rk" style={{ fontSize: 36, fontWeight: 700, color: "#f0d488" }}>{Math.round(5 * count)} qaris</div><div style={{ fontSize: 12, fontWeight: 700, color: "rgba(247,241,227,.55)", letterSpacing: ".08em", textTransform: "uppercase" }}>Per verse · training goal</div></div>
             <div className="center" style={{ background: "#0a352b", padding: 24 }}><div className="rk" style={{ fontSize: 36, fontWeight: 700, color: "#f0d488" }}>Free</div><div style={{ fontSize: 12, fontWeight: 700, color: "rgba(247,241,227,.55)", letterSpacing: ".08em", textTransform: "uppercase" }}>Forever · for everyone</div></div>
@@ -92,13 +93,13 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
       </div>
       {/* FOR QARIS */}
       <div id="qaris" style={{ maxWidth: 1280, margin: "0 auto", padding: "100px 32px 50px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
           <div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(212,169,74,.12)", border: "1px solid rgba(212,169,74,.45)", borderRadius: 99, padding: "7px 18px", marginBottom: 18 }}>
               <span style={{ fontSize: 15 }}>🎙</span>
               <span className="rk" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".2em", textTransform: "uppercase", color: "#f0d488" }}>For respected qaris & huffaz</span>
             </div>
-            <h2 className="rk" style={{ fontSize: 44, margin: "0 0 20px", fontWeight: 600, lineHeight: 1.2 }}>Your recitation, preserved as a waqf of sound</h2>
+            <h2 className="rk" style={{ fontSize: "clamp(30px, 5.5vw, 44px)", margin: "0 0 20px", fontWeight: 600, lineHeight: 1.2 }}>Your recitation, preserved as a waqf of sound</h2>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(247,241,227,.7)", margin: "0 0 28px" }}>Whether you hold an ijazah or simply recite with care, your voice can teach students you will never meet. Every approved verse becomes part of a permanent, open collection — a sadaqah jariyah that recites on your behalf.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18, marginBottom: 32 }}>
               {[
@@ -134,10 +135,10 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
               <span style={{ fontSize: 15 }}>📖</span>
               <span className="rk" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".2em", textTransform: "uppercase", color: "#8fd4b4" }}>For every learner in the ummah</span>
             </div>
-            <h2 className="rk" style={{ fontSize: 44, margin: "0 0 18px", fontWeight: 600, lineHeight: 1.2 }}>Learn tajweed in any voice you love</h2>
+            <h2 className="rk" style={{ fontSize: "clamp(30px, 5.5vw, 44px)", margin: "0 0 18px", fontWeight: 600, lineHeight: 1.2 }}>Learn tajweed in any voice you love</h2>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(247,241,227,.7)", margin: 0 }}>Children learning their first surah, mothers and fathers returning to the Quran, students perfecting makharij — everyone learns free, at their own pace, in their own home.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 22 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 22 }}>
             {[
               ["🦻", "Listen & repeat", "Stream any reciter from the online library — Alafasy, Abdul Basit, Al-Husary and more — and repeat at your pace."],
               ["🎯", "Gentle tajweed feedback", "Recite back and get kind, specific guidance on makharij and rules — no embarrassment, ever."],
@@ -160,22 +161,22 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
       <div id="loop" style={{ maxWidth: 1280, margin: "0 auto", padding: "100px 32px 60px" }}>
         <div className="center" style={{ marginBottom: 56 }}>
           <div className="ar" style={{ fontSize: 26, color: "#d4a94a", marginBottom: 8 }}>﴾ ۞ ﴿</div>
-          <h2 className="rk" style={{ fontSize: 44, margin: "0 0 14px", fontWeight: 600 }}>A circle of knowledge</h2>
+          <h2 className="rk" style={{ fontSize: "clamp(30px, 5.5vw, 44px)", margin: "0 0 14px", fontWeight: 600 }}>A circle of knowledge</h2>
           <p style={{ fontSize: 16, color: "rgba(247,241,227,.65)", maxWidth: 560, margin: "0 auto", lineHeight: 1.7 }}>"The best of you are those who learn the Quran and teach it." Tilawah connects both halves of that hadith.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr", gap: 20, alignItems: "center" }}>
+        <div className="loop-grid">
           <div className="center" style={{ background: "rgba(212,169,74,.08)", border: "1px solid rgba(212,169,74,.45)", borderRadius: 20, padding: "36px 30px" }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>🎙</div>
             <div className="rk" style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Qaris recite</div>
             <div style={{ fontSize: 14, color: "rgba(247,241,227,.6)", lineHeight: 1.7 }}>Verse by verse, five voices per ayah, reviewed for accuracy.</div>
           </div>
-          <div className="rk" style={{ fontSize: 28, color: "#d4a94a" }}>→</div>
+          <div className="rk loop-arrow" style={{ fontSize: 28, color: "#d4a94a" }}>→</div>
           <div className="center" style={{ background: "rgba(247,241,227,.05)", border: "1px solid rgba(212,169,74,.35)", borderRadius: 20, padding: "36px 30px" }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>🧠</div>
             <div className="rk" style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>The collection grows</div>
             <div style={{ fontSize: 14, color: "rgba(247,241,227,.6)", lineHeight: 1.7 }}>An open dataset and voice model — a permanent waqf, owned by no one.</div>
           </div>
-          <div className="rk" style={{ fontSize: 28, color: "#8fd4b4" }}>→</div>
+          <div className="rk loop-arrow" style={{ fontSize: 28, color: "#8fd4b4" }}>→</div>
           <div className="center" style={{ background: "rgba(24,122,94,.15)", border: "1px solid rgba(143,212,180,.4)", borderRadius: 20, padding: "36px 30px" }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>📖</div>
             <div className="rk" style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>The ummah learns</div>
@@ -196,7 +197,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
 
       {/* FINAL CTA */}
       <div className="center" style={{ maxWidth: 1280, margin: "0 auto", padding: "100px 32px 90px" }}>
-        <h2 className="rk" style={{ fontSize: 52, margin: "0 0 16px", fontWeight: 600 }}>Whichever path is yours,<br />it starts with one ayah</h2>
+        <h2 className="rk" style={{ fontSize: "clamp(32px, 7vw, 52px)", margin: "0 0 16px", fontWeight: 600 }}>Whichever path is yours,<br />it starts with one ayah</h2>
         <p style={{ fontSize: 18, color: "rgba(247,241,227,.65)", maxWidth: 540, margin: "0 auto 44px", lineHeight: 1.7 }}>Join free today — recite, learn, or support the mission with a donation.</p>
         <div className="flex-center" style={{ gap: 18, flexWrap: "wrap" }}>
           <button className="btn btn-gold btn-gold-pulse" style={{ fontSize: 17, padding: "17px 40px" }} onClick={() => nav("register")}>🎙 Recite</button>
@@ -206,7 +207,7 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
       </div>
       {/* FOOTER */}
       <div style={{ borderTop: "1px solid rgba(212,169,74,.25)", background: "#051a15" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "44px 32px 30px", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40 }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "44px 32px 30px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 32 }}>
           <div>
             <div style={{ marginBottom: 12 }}><Brand /></div>
             <div style={{ fontSize: 13, color: "rgba(247,241,227,.5)", lineHeight: 1.7, maxWidth: 280 }}>An open, non-profit Quran voice collection. Recite for the Ummah, learn for a lifetime.</div>
@@ -219,12 +220,12 @@ export default function LandingPage({ nav }: { nav: (v: View) => void }) {
             <div key={head} style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
               <div className="rk" style={{ fontWeight: 700, fontSize: 12, letterSpacing: ".2em", textTransform: "uppercase", color, marginBottom: 4 }}>{head}</div>
               {links.map(([view, label]) => (
-                <a key={label} href="#" onClick={(e) => { e.preventDefault(); nav(view); }} style={{ color: "rgba(247,241,227,.6)" }}>{label}</a>
+                <a key={label} href={pathForView(view)} onClick={(e) => { e.preventDefault(); nav(view); }} style={{ color: "rgba(247,241,227,.6)" }}>{label}</a>
               ))}
             </div>
           ))}
         </div>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 32px 30px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "rgba(247,241,227,.4)", borderTop: "1px solid rgba(212,169,74,.15)" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 32px 30px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, fontSize: 12, color: "rgba(247,241,227,.4)", borderTop: "1px solid rgba(212,169,74,.15)" }}>
           <span>© 2026 Tilawah · A community waqf</span>
           <span className="ar" style={{ fontSize: 15, color: "rgba(212,169,74,.7)" }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</span>
         </div>

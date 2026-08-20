@@ -102,3 +102,13 @@ export interface Assignment {
   juz: number | null;
   status: string;
 }
+
+export interface CorrectionResult {
+  status: string;
+  transcript: string;
+  matched_ayah_text: string | null;
+  note: string | null;
+  match_score: number | null;
+  summary: string | null;
+  errors: WordError[];
+}
