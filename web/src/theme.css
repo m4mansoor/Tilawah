@@ -5,11 +5,11 @@
   --green-200: #b8e8d2; --green-100: #e9f3ec;
   --cream: #f7f1e3; --card: #fffdf7; --card-warm: #fdfaf1;
   --ink: #123c32; --ink-dark: #06201a; --muted: #9aa79e; --muted-2: #6b7a70;
-  --gold-800: #b07d13; --gold-600: #c9992b; --gold-500: #d4a94a; --gold-400: #eec96a;
+  --gold-800: #b07d13; --gold-ink: #8a6410; --gold-600: #c9992b; --gold-500: #d4a94a; --gold-400: #eec96a;
   --gold-300: #f0d488; --gold-200: #f0e5c4; --gold-100: #f9f3e4;
   --red: #e05252; --red-light: #f08c8c;
   --gold-grad: linear-gradient(135deg, #d4a94a, #eec96a);
-  --green-grad: linear-gradient(135deg, #187a5e, #2ea380);
+  --green-grad: linear-gradient(135deg, #12604a, #1a7a5c);
   --dark-grad: linear-gradient(160deg, #06201a 0%, #0a352b 55%, #0e4a3a 100%);
   --font-display: 'Reem Kufi', sans-serif;
   --font-body: 'Manrope', sans-serif;
@@ -24,6 +24,10 @@ html { scroll-behavior: smooth; }
 body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; background: var(--cream); }
 a { color: var(--green-600); text-decoration: none; transition: color .2s; }
 a:hover { color: var(--gold-600); }
+/* The global link green is only legible on light surfaces — dark ones need gold. */
+/* :not(.btn) — buttons carry their own colour and must not be recoloured here */
+.auth-wrap a:not(.btn), .surface-dark a:not(.btn), .surface-dark-plain a:not(.btn), .pagehead a:not(.btn) { color: var(--gold-300); }
+.auth-wrap a:not(.btn):hover, .surface-dark a:not(.btn):hover, .surface-dark-plain a:not(.btn):hover, .pagehead a:not(.btn):hover { color: var(--gold-400); }
 h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
@@ -44,12 +48,22 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 .pattern-overlay { position: absolute; inset: 0; background-image: var(--bg-pattern-dark); animation: drift 80s linear infinite; }
 .pattern-overlay-green { position: absolute; inset: 0; background-image: var(--bg-pattern-dark-green); animation: drift 80s linear infinite; }
 .eyebrow { font-family: var(--font-display); font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: var(--gold-500); font-weight: 700; }
+/* the bright golds only clear AA on dark surfaces; light cards need the ink gold */
+.surface-light .eyebrow, .card .eyebrow { color: var(--gold-ink); }
+.card .gold, .surface-light .card .gold { color: var(--gold-ink); }
 .ar { font-family: var(--font-arabic); }
 .rk { font-family: var(--font-display); }
 .gold { color: var(--gold-500); }
 .gold-light { color: var(--gold-300); }
 .mut { color: var(--muted); }
 .mut-2 { color: var(--muted-2); }
+/* The base --muted greys are tuned for dark surfaces (5.4:1 there) and fail AA on
+   light ones. Redefining the custom property — rather than the .mut class — means
+   inline `color: var(--muted)` picks the light value up too. */
+.surface-light, .card { --muted: #5f6e65; --muted-2: #4d5b52; }
+/* a .card given a dark inline background opts back out of the light palette */
+.card.card-dark { --muted: #9aa79e; --muted-2: #6b7a70; }
+.card.card-dark .eyebrow { color: var(--gold-500); }
 
 /* crescent */
 .crescent { border-radius: 50% 50% 50% 0; background: var(--gold-grad); display: inline-flex; align-items: center; justify-content: center; transform: rotate(-45deg); box-shadow: 0 4px 14px rgba(212,169,74,.4); flex-shrink: 0; }
@@ -58,7 +72,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 .crescent-green span { color: #f7f1e3; }
 .brand { display: inline-flex; align-items: center; gap: 12px; }
 .brand .ar-name { font-family: var(--font-arabic); font-size: 23px; line-height: 1; color: var(--gold-300); }
-.brand .en-name { font-family: var(--font-display); font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: rgba(247,241,227,.6); }
+.brand .en-name { font-family: var(--font-display); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: rgba(247,241,227,.6); }
 .brand.green .ar-name { color: var(--green-300); }
 
 /* buttons */
@@ -71,6 +85,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 .btn-dark:hover { background: var(--green-800); }
 .btn-ghost { background: rgba(247,241,227,.07); border: 1px solid rgba(212,169,74,.4); color: #f7f1e3; }
 .btn-ghost:hover { background: rgba(212,169,74,.15); }
+/* ghost button for light cards — the cream .btn-ghost is invisible on white */
+.btn-ghost-light { background: rgba(212,169,74,.1); border: 1px solid rgba(212,169,74,.55); color: var(--green-600); }
+.btn-ghost-light:hover { background: rgba(212,169,74,.22); color: var(--ink-dark); }
 .btn-outline { background: transparent; border: 1px solid rgba(212,169,74,.5); color: var(--green-600); }
 .btn-outline:hover { background: rgba(212,169,74,.15); }
 .btn-outline-dark { background: transparent; border: 1px solid rgba(212,169,74,.45); color: var(--gold-300); }
@@ -120,7 +137,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 
 /* pills */
 .pill { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 4px 12px; border-radius: 99px; }
-.pill-gold { background: #fdf6e3; color: var(--gold-800); border: 1px solid rgba(212,169,74,.5); }
+.pill-gold { background: #fdf6e3; color: var(--gold-ink); border: 1px solid rgba(212,169,74,.5); }
 .pill-green { background: var(--green-100); color: var(--green-600); border: 1px solid rgba(14,90,69,.3); }
 .pill-red { background: #fdeaea; color: #b23b3b; border: 1px solid rgba(224,82,82,.35); }
 
@@ -134,9 +151,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; }
 
 /* footer */
 .footer { background: linear-gradient(160deg, #06201a, #0a352b); }
-.footer-inner { max-width: 1240px; margin: 0 auto; padding: 26px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(247,241,227,.45); flex-wrap: wrap; gap: 14px; }
+.footer-inner { max-width: 1240px; margin: 0 auto; padding: 26px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(247,241,227,.72); flex-wrap: wrap; gap: 14px; }
 .footer-links { display: flex; gap: 18px; }
-.footer-links a { color: rgba(247,241,227,.55); }
+.footer-links a { color: rgba(247,241,227,.8); }
 .footer-ar { font-family: var(--font-arabic); font-size: 16px; color: rgba(212,169,74,.75); }
 
 /* auth */
@@ -175,6 +192,10 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 640px) {
   .nav-inner { padding: 12px 16px; }
   .nav-links { gap: 10px 16px; font-size: 13px; }
+  /* keep every nav link reachable on narrow phones instead of wrapping raggedly */
+  .nav-links { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a { white-space: nowrap; }
   .nav-right { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
   .pagehead .inner { padding: 40px 18px; }
   .auth-wrap { padding: 28px 16px; }
@@ -184,6 +205,25 @@ img { max-width: 100%; height: auto; }
   .btn-lg { padding: 13px 26px; font-size: 15px; }
   .lang-btn { padding: 4px 12px; font-size: 14px; }
 }
+/* verse rows (surah view) — must stack on phones or Listen/Recite land off-screen */
+.verse-row { display: flex; align-items: center; gap: 24px; padding: 22px 28px; }
+.verse-row .verse-text { flex: 1; min-width: 0; }
+.verse-row .verse-slots { display: flex; gap: 6px; flex-shrink: 0; }
+.verse-row > .btn { flex-shrink: 0; }
+@media (max-width: 720px) {
+  .verse-row { flex-wrap: wrap; gap: 12px 10px; padding: 18px 16px; }
+  .verse-row .verse-text { flex: 1 1 100%; order: 1; }
+  .verse-row .diamond { order: 0; }
+  .verse-row .verse-slots { order: 2; margin-right: auto; }
+  .verse-row > .btn { order: 3; }
+}
+
+/* tap targets — WCAG 2.5.8 asks for 24px minimum */
+.nav-links a, .footer-links a { display: inline-block; padding-block: 5px; }
+.topnav a, .nav-user, .nav-logout, .lang-btn { display: inline-flex; align-items: center; min-height: 24px; }
+.nav-logout { padding-block: 4px; }
+.auth-card a:not(.btn), .auth-wrap a:not(.btn), .nav-inner a:not(.btn) { display: inline-flex; align-items: center; min-height: 24px; }
+
 .divider { height: 1px; background: rgba(212,169,74,.3); }
 .slot { width: 26px; height: 26px; border-radius: 7px; display: inline-block; }
 .slot-gold { background: var(--gold-grad); }

@@ -170,7 +170,7 @@ function AuthShell({ children, wide = false }: { children: React.ReactNode; wide
         <div className="ar" style={{ fontSize: 30, color: "var(--gold-300)" }}>تلاوة</div>
       </div>
       <div className="auth-card" style={{ maxWidth: wide ? 460 : 420 }}>{children}</div>
-      <div className="ar" style={{ marginTop: 28, fontSize: 16, color: "rgba(212,169,74,.6)", position: "relative" }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
+      <div className="ar" style={{ marginTop: 28, fontSize: 16, color: "rgba(212,169,74,.85)", position: "relative" }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
     </div>
   );
 }
@@ -192,18 +192,18 @@ function LoginPage({ nav, onAuthed }: { nav: (v: View) => void; onAuthed: () => 
         <div className="eyebrow">Welcome back</div>
         <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "0 0 28px" }}>Sign in to Tilawah</h1>
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
-          <div><div className="field-label">Email</div><input className="input" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div><div className="field-label">Email</div><input className="input" aria-label="Email" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
               <div className="field-label" style={{ marginBottom: 0 }}>Password</div>
               <a href="#" onClick={(e) => { e.preventDefault(); nav("forgot"); }} style={{ fontSize: 12, fontWeight: 600 }}>Forgot?</a>
             </div>
-            <input className="input" type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input className="input" aria-label="Password" type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           {error && <div style={{ color: "var(--red-light)", fontSize: 13 }}>{error}</div>}
           <button className="btn btn-lg btn-gold" disabled={busy} style={{ marginTop: 8, width: "100%" }}>{busy ? "Signing in…" : "Sign in"}</button>
           <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "6px 0" }}>
-            <div className="divider" style={{ flex: 1 }} /><span style={{ fontSize: 11, color: "rgba(247,241,227,.45)", letterSpacing: ".15em", textTransform: "uppercase" }}>or</span><div className="divider" style={{ flex: 1 }} />
+            <div className="divider" style={{ flex: 1 }} /><span style={{ fontSize: 11, color: "rgba(247,241,227,.7)", letterSpacing: ".15em", textTransform: "uppercase" }}>or</span><div className="divider" style={{ flex: 1 }} />
           </div>
           <button type="button" className="btn btn-md btn-ghost" style={{ width: "100%" }}>Continue with Google</button>
         </form>
@@ -235,9 +235,9 @@ function RegisterPage({ nav, onAuthed }: { nav: (v: View) => void; onAuthed: () 
         <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "0 0 8px" }}>Create your account</h1>
         <p style={{ fontSize: 13, color: "rgba(247,241,227,.6)", lineHeight: 1.6, margin: "0 0 26px" }}>Lend your voice to the Quran collection — every recitation counts.</p>
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
-          <div><div className="field-label">Full name</div><input className="input" placeholder="Inaam Ahmed" value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div><div className="field-label">Email</div><input className="input" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div><div className="field-label">Password</div><input className="input" type="password" required placeholder="8+ characters" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          <div><div className="field-label">Full name</div><input className="input" aria-label="Full name" placeholder="Inaam Ahmed" value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><div className="field-label">Email</div><input className="input" aria-label="Email" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div><div className="field-label">Password</div><input className="input" aria-label="Password" type="password" required placeholder="8+ characters" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
           <div>
             <div className="field-label">Recitation experience</div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -248,7 +248,7 @@ function RegisterPage({ nav, onAuthed }: { nav: (v: View) => void; onAuthed: () 
           </div>
           {error && <div style={{ color: "var(--red-light)", fontSize: 13 }}>{error}</div>}
           <button className="btn btn-lg btn-gold" disabled={busy} style={{ marginTop: 8, width: "100%" }}>{busy ? "Creating…" : "Create account"}</button>
-          <div style={{ fontSize: 11, color: "rgba(247,241,227,.45)", textAlign: "center", lineHeight: 1.6 }}>
+          <div style={{ fontSize: 11, color: "rgba(247,241,227,.7)", textAlign: "center", lineHeight: 1.6 }}>
             By joining you agree to our <a href="#" onClick={(e) => { e.preventDefault(); nav("terms"); }}>Terms</a> and <a href="#" onClick={(e) => { e.preventDefault(); nav("privacy"); }}>Privacy Policy</a>.
           </div>
         </form>
@@ -269,7 +269,7 @@ function ForgotPage({ nav }: { nav: (v: View) => void }) {
         <h1 className="rk" style={{ fontSize: 26, color: "#f7f1e3", margin: "0 0 8px" }}>Forgot your password?</h1>
         <p style={{ fontSize: 13, color: "rgba(247,241,227,.6)", lineHeight: 1.65, margin: "0 0 26px" }}>{sent ? "If an account exists for that email, a reset link is on its way." : "Enter your email and we'll send you a link to reset it."}</p>
         <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
-          <div><div className="field-label">Email</div><input className="input" type="email" required placeholder="you@example.com" /></div>
+          <div><div className="field-label">Email</div><input className="input" aria-label="Email" type="email" required placeholder="you@example.com" /></div>
           <button className="btn btn-lg btn-gold" style={{ width: "100%" }}>Send reset link</button>
         </form>
         <div style={{ marginTop: 26, fontSize: 13, color: "rgba(247,241,227,.6)" }}><a href="#" onClick={(e) => { e.preventDefault(); nav("login"); }} style={{ fontWeight: 700 }}>← Back to sign in</a></div>
@@ -410,7 +410,7 @@ function HomePage({ nav, profile, onRecite, lang, onToggleLang, onLogout }: { na
           <button className="btn btn-lg btn-gold btn-gold-pulse" disabled={busy} onClick={reciteNext}>{busy ? "Finding…" : "🎙 Start reciting"}</button>
         </div>
       </div>
-      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "50px 28px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "50px 28px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {coverage && (
             <div className="card" style={{ padding: "30px 34px" }}>
@@ -419,7 +419,7 @@ function HomePage({ nav, profile, onRecite, lang, onToggleLang, onLogout }: { na
                 <span className="pill pill-gold">{Math.round((coverage.covered_ayahs / coverage.total_ayahs) * 100)}% complete</span>
               </div>
               <div className="bar"><div className="bar-fill" style={{ width: `${Math.min(100, (coverage.covered_ayahs / coverage.total_ayahs) * 100)}%` }} /></div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16, marginTop: 22 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))", gap: 16, marginTop: 22 }}>
                 <Stat value={coverage.approved_samples} label="Approved" />
                 <Stat value={coverage.covered_ayahs} label="Verses covered" />
                 <Stat value={coverage.complete_ayahs} label="Fully collected" />
@@ -448,21 +448,21 @@ function HomePage({ nav, profile, onRecite, lang, onToggleLang, onLogout }: { na
               <ol style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
                 {board.slice(0, 5).map((e, i) => (
                   <li key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span className="rk" style={{ fontWeight: 700, color: "var(--gold-600)", width: 22 }}>{i + 1}</span>
+                    <span className="rk" style={{ fontWeight: 700, color: "var(--gold-ink)", width: 22 }}>{i + 1}</span>
                     <span style={{ fontWeight: 700, fontSize: 14, flex: 1 }}>{e.name}</span>
-                    <span className="rk" style={{ color: "var(--gold-800)", fontWeight: 700 }}>★ {e.points}</span>
+                    <span className="rk" style={{ color: "var(--gold-ink)", fontWeight: 700 }}>★ {e.points}</span>
                   </li>
                 ))}
               </ol>
             )}
           </div>
-          <div className="card" style={{ padding: "22px 24px", background: "var(--dark-grad)", border: "1px solid rgba(212,169,74,.4)" }}>
+          <div className="card card-dark" style={{ padding: "22px 24px", background: "var(--dark-grad)", border: "1px solid rgba(212,169,74,.4)" }}>
             <div className="eyebrow" style={{ marginBottom: 8 }}>Prayer times</div>
             <div className="rk" style={{ fontSize: 20, fontWeight: 700, color: "#f7f1e3" }}>{nextPrayerLabel()}</div>
             <div style={{ fontSize: 12, color: "rgba(247,241,227,.55)", marginTop: 6 }}>Makkah, Saudi Arabia</div>
           </div>
           <div className="card" style={{ padding: "22px 24px", textAlign: "center" }}>
-            <div className="ar" style={{ fontSize: 22, color: "var(--gold-600)", marginBottom: 8 }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
+            <div className="ar" style={{ fontSize: 22, color: "var(--gold-ink)", marginBottom: 8 }}>وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div>
             <div style={{ fontSize: 13, color: "var(--muted-2)", fontStyle: "italic" }}>"And recite the Quran with measured recitation." — Quran 73:4</div>
           </div>
         </div>
@@ -486,7 +486,7 @@ function BrowsePage({ nav, profile, onOpenSurah, lang, onToggleLang, onLogout }:
           <div className="ar" style={{ fontSize: 24, color: "var(--gold-500)", marginBottom: 8 }}>ٱقْرَأْ بِٱسْمِ رَبِّكَ</div>
           <h1 className="rk" style={{ fontSize: "clamp(30px, 6vw, 40px)", color: "#f7f1e3", margin: "0 0 10px" }}>Browse the Quran</h1>
           <p style={{ color: "rgba(247,241,227,.65)", fontSize: 15, margin: "0 0 24px" }}>114 surahs · 6,236 verses — find the verse that needs your voice.</p>
-          <input className="input" placeholder="Search surah…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ maxWidth: 420, margin: "0 auto" }} />
+          <input className="input" aria-label="Search surah" placeholder="Search surah…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ maxWidth: 420, margin: "0 auto" }} />
         </div>
       </PageHead>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 28px 70px" }}>
@@ -494,12 +494,12 @@ function BrowsePage({ nav, profile, onOpenSurah, lang, onToggleLang, onLogout }:
           {filtered.map((s) => (
             <a key={s.number} href="#" onClick={(e) => { e.preventDefault(); onOpenSurah(s); }} className="card card-hover" style={{ padding: "20px 22px", display: "flex", alignItems: "center", gap: 16, color: "inherit" }}>
               <div className="diamond"><span>{s.number}</span></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="verse-text">
                 <div style={{ fontWeight: 800, fontSize: 15, color: "var(--ink-dark)" }}>{s.name}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>{s.english_name} · {s.ayah_count} verses</div>
                 <div className="bar-thin"><div className="bar-fill" style={{ width: "8%" }} /></div>
               </div>
-              <span className="ar" style={{ fontSize: 22, color: "var(--gold-600)", flexShrink: 0 }}>{s.name.includes("Al-Fatihah") ? "الفاتحة" : s.name.includes("Ikhlas") ? "الإخلاص" : "سورة"}</span>
+              <span className="ar" style={{ fontSize: 22, color: "var(--gold-ink)", flexShrink: 0 }}>{s.name.includes("Al-Fatihah") ? "الفاتحة" : s.name.includes("Ikhlas") ? "الإخلاص" : "سورة"}</span>
             </a>
           ))}
         </div>
@@ -521,21 +521,21 @@ function SurahPage({ nav, sel, onRecite, profile, lang, onToggleLang, onLogout }
       <PageHead>
         <div className="center" style={{ maxWidth: 720, margin: "0 auto" }}>
           <div className="ar" style={{ fontSize: "clamp(30px, 7vw, 40px)", color: "var(--gold-500)", marginBottom: 8 }}>{SURAH_NAMES[sel.surah || 1] || "سورة"}</div>
-          <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "0 0 8px" }}>{sel.label}</h1>
+          <h1 className="ar" style={{ fontSize: 40, lineHeight: 1.7, color: "#f7f1e3", margin: "0 0 8px" }}>{sel.label}</h1>
           <div style={{ color: "rgba(247,241,227,.6)", fontSize: 13 }}>{ayahs.length} verses · target 5 qaris per verse</div>
         </div>
       </PageHead>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 28px 60px", display: "flex", flexDirection: "column", gap: 14 }}>
         {ayahs.map((a) => (
-          <div key={a.ayah} className="card card-hover" style={{ padding: "22px 28px", display: "flex", alignItems: "center", gap: 24 }}>
+          <div key={a.ayah} className="card card-hover verse-row">
             <div className="diamond"><span>{a.ayah}</span></div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="verse-text">
               <div className="ar" style={{ fontSize: 24, lineHeight: 1.8, color: "var(--ink-dark)", direction: "rtl", textAlign: "right" }}>{a.text}</div>
             </div>
-            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            <div className="verse-slots">
               {[0, 1, 2, 3, 4].map((j) => <span key={j} className={`slot ${j < (a.sample_count || 0) ? "slot-gold" : "slot-empty"}`} />)}
             </div>
-            <button className="btn btn-sm btn-ghost" onClick={() => { const key = `${a.surah}:${a.ayah}`; if (playingKey === key) { stopVerse(); setPlayingKey(null); } else playVerse(a.surah, a.ayah, "Alafasy_128kbps", (f) => setPlayingKey(f ? key : null)); }}>{playingKey === `${a.surah}:${a.ayah}` ? "⏸ Stop" : "▶ Listen"}</button>
+            <button className="btn btn-sm btn-ghost-light" onClick={() => { const key = `${a.surah}:${a.ayah}`; if (playingKey === key) { stopVerse(); setPlayingKey(null); } else playVerse(a.surah, a.ayah, "Alafasy_128kbps", (f) => setPlayingKey(f ? key : null)); }}>{playingKey === `${a.surah}:${a.ayah}` ? "⏸ Stop" : "▶ Listen"}</button>
             <button className="btn btn-sm btn-dark" onClick={() => onRecite({ scope: "ayah", surah: sel.surah, ayah: a.ayah, juz: null, text: a.text, label: `${sel.surah}:${a.ayah}` })}>🎙 Recite</button>
           </div>
         ))}
@@ -774,7 +774,7 @@ function AssignmentsPage({ nav, profile, onRecite, lang, onToggleLang, onLogout 
           {items.map((a) => (
             <div key={a.id} className="card card-hover" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span className="ar" style={{ fontSize: 28, color: "var(--gold-600)" }}>{a.scope === "juz" ? "جزء" : "سورة"}</span>
+                <span className="ar" style={{ fontSize: 28, color: "var(--gold-ink)" }}>{a.scope === "juz" ? "جزء" : "سورة"}</span>
                 <span className="pill pill-gold">{a.scope === "surah" ? `Surah ${a.surah}` : a.scope === "juz" ? `Juz ${a.juz}` : `${a.surah}:${a.ayah}`}</span>
               </div>
               <div className="rk" style={{ fontSize: 19, fontWeight: 700, color: "var(--ink-dark)" }}>
@@ -811,13 +811,13 @@ function LeaderboardPage({ nav, profile, lang, onToggleLang, onLogout }: { nav: 
             const you = r.name === (profile?.name || "");
             return (
               <div key={i} style={{ background: you ? "linear-gradient(150deg,#06201a,#0e4a3a)" : "var(--card)", border: `1px solid ${you ? "rgba(212,169,74,.7)" : "rgba(212,169,74,.32)"}`, borderRadius: 14, padding: "16px 22px", display: "flex", alignItems: "center", gap: 18 }}>
-                <span className="rk" style={{ fontWeight: 700, fontSize: 16, color: "var(--gold-600)", width: 36 }}>#{i + 1}</span>
+                <span className="rk" style={{ fontWeight: 700, fontSize: 16, color: "var(--gold-ink)", width: 36 }}>#{i + 1}</span>
                 <div className="avatar" style={{ width: 40, height: 40, fontSize: 16 }}>{r.name[0]}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, color: you ? "var(--gold-300)" : "var(--ink-dark)" }}>{r.name}{you ? " (you)" : ""}</div>
                   <div className="mut" style={{ fontSize: 12 }}>🔥 {r.streak} day streak</div>
                 </div>
-                <span className="rk" style={{ fontWeight: 700, fontSize: 16, color: "var(--gold-800)", width: 70, textAlign: "right" }}>★ {r.points}</span>
+                <span className="rk" style={{ fontWeight: 700, fontSize: 16, color: "var(--gold-ink)", width: 70, textAlign: "right" }}>★ {r.points}</span>
               </div>
             );
           })}
@@ -876,7 +876,8 @@ function ReviewPage({ nav }: { nav: (v: View) => void }) {
   const [items, setItems] = useState<Recitation[]>([]);
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { api.adminQueue("pending").then(setItems).catch(() => {}); }, []);
+  const [denied, setDenied] = useState(false);
+  useEffect(() => { api.adminQueue("pending").then(setItems).catch(() => setDenied(true)); }, []);
   const item = items[idx];
   async function act(status: string) {
     if (!item) return; setBusy(true);
@@ -886,10 +887,10 @@ function ReviewPage({ nav }: { nav: (v: View) => void }) {
     <div className="surface-dark" style={{ display: "flex", flexDirection: "column" }}>
       <div className="pattern-overlay" />
       <div style={{ position: "relative", zIndex: 5, maxWidth: 1100, width: "100%", margin: "0 auto", padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-        <a href="#" onClick={(e) => { e.preventDefault(); nav("home"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.7)" }}>← Home</a>
+        <a href="#" onClick={(e) => { e.preventDefault(); nav("home"); }} className="rk" style={{ fontWeight: 700, fontSize: 14, color: "rgba(247,241,227,.8)", display: "inline-flex", alignItems: "center", minHeight: 24 }}>← Home</a>
         <div className="center">
           <div className="rk" style={{ fontSize: 18, fontWeight: 700, color: "#f7f1e3" }}>Review queue <span className="ar" style={{ color: "var(--gold-500)", fontSize: 22, marginLeft: 6 }}>المراجعة</span></div>
-          <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(247,241,227,.5)", fontWeight: 700 }}>{Math.max(0, items.length - idx)} recordings awaiting review</div>
+          <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(247,241,227,.75)", fontWeight: 700 }}>{denied ? "Restricted" : `${Math.max(0, items.length - idx)} recordings awaiting review`}</div>
         </div>
         <span className="rk" style={{ fontSize: 13, fontWeight: 700, color: "var(--gold-300)" }}>Reviewer mode</span>
       </div>
@@ -909,11 +910,18 @@ function ReviewPage({ nav }: { nav: (v: View) => void }) {
               <button className="btn btn-md" disabled={busy} style={{ background: "rgba(224,82,82,.18)", color: "var(--red-light)", border: "1px solid rgba(224,82,82,.4)" }} onClick={() => act("rejected")}>✕ Reject</button>
             </div>
           </div>
+        ) : denied ? (
+          <div className="center fade-up">
+            <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
+            <div className="rk" style={{ fontSize: 30, fontWeight: 600, color: "#f7f1e3", marginBottom: 8 }}>Reviewer access only</div>
+            <div style={{ fontSize: 15, marginBottom: 26, color: "rgba(247,241,227,.72)" }}>This queue is open to approved reviewers. If you think you should have access, please get in touch.</div>
+            <button className="btn btn-md btn-gold" onClick={() => nav("home")}>Back to home</button>
+          </div>
         ) : (
           <div className="center fade-up">
             <div style={{ fontSize: 52, marginBottom: 16 }}>🌙</div>
             <div className="rk" style={{ fontSize: 30, fontWeight: 600, color: "#f7f1e3", marginBottom: 8 }}>Queue clear — JazakAllah khair!</div>
-            <div className="mut" style={{ fontSize: 15, marginBottom: 26 }}>No more recordings to review.</div>
+            <div style={{ fontSize: 15, marginBottom: 26, color: "rgba(247,241,227,.72)" }}>No more recordings to review.</div>
             <button className="btn btn-md btn-gold" onClick={() => nav("home")}>Back to home</button>
           </div>
         )}
@@ -930,7 +938,7 @@ function LearnHome({ nav, profile, lang, onToggleLang, onLogout, onPractice }: {
         right={<button className="btn btn-sm btn-ghost" onClick={() => nav("home")}>🎙 Qari mode</button>} />
       <PageHead learn>
         <div className="center" style={{ maxWidth: 640, margin: "0 auto" }}>
-          <div className="eyebrow" style={{ color: "var(--green-400)" }}>Learn mode</div>
+          <div className="eyebrow" style={{ color: "var(--green-300)" }}>Learn mode</div>
           <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "8px 0 10px" }}>Master Al-Fatihah</h1>
           <p style={{ color: "rgba(247,241,227,.65)", fontSize: 15 }}>Listen, repeat, and get live tajweed feedback — one ayah at a time.</p>
           <button className="btn btn-lg btn-green" onClick={onPractice}>Continue learning →</button>
@@ -945,7 +953,7 @@ function LearnHome({ nav, profile, lang, onToggleLang, onLogout, onPractice }: {
               <div key={i} style={{ background: current ? "var(--green-100)" : "var(--card-warm)", border: `1px solid ${current ? "rgba(24,122,94,.45)" : "rgba(212,169,74,.2)"}`, borderRadius: 14, padding: "18px 22px", display: "flex", alignItems: "center", gap: 16 }}>
                 <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, background: done ? "var(--green-grad)" : "var(--card)", color: done ? "#f7f1e3" : "var(--muted)", border: current ? "2px solid var(--green-500)" : "1px solid rgba(212,169,74,.4)" }}>{done ? "✓" : i + 1}</div>
                 <div className="ar" style={{ fontSize: 22, lineHeight: 1.7, color: "var(--ink-dark)", direction: "rtl", flex: 1, textAlign: "right" }}>{ar}</div>
-                <span className="rk" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: done ? "var(--green-500)" : current ? "var(--gold-800)" : "var(--muted)" }}>{done ? "Learned" : current ? "Today" : "Locked"}</span>
+                <span className="rk" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: done ? "var(--green-500)" : current ? "var(--gold-ink)" : "var(--muted)" }}>{done ? "Learned" : current ? "Today" : "Locked"}</span>
               </div>
             );
           })}
@@ -965,7 +973,7 @@ function LearnBrowse({ nav, profile, lang, onToggleLang, onLogout, onPractice }:
         right={<button className="btn btn-sm btn-ghost" onClick={() => nav("home")}>🎙 Qari mode</button>} />
       <PageHead learn>
         <div className="center">
-          <div className="eyebrow" style={{ color: "var(--green-400)" }}>Browse & learn</div>
+          <div className="eyebrow" style={{ color: "var(--green-300)" }}>Browse & learn</div>
           <h1 className="rk" style={{ fontSize: 36, color: "#f7f1e3", margin: "8px 0 8px" }}>Choose a surah</h1>
           <div style={{ color: "rgba(247,241,227,.6)", fontSize: 14 }}>Short surahs to build your confidence.</div>
         </div>
@@ -998,7 +1006,7 @@ function ProgressPage({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v:
         right={<button className="btn btn-sm btn-ghost" onClick={() => nav("home")}>🎙 Qari mode</button>} />
       <PageHead learn>
         <div className="center">
-          <div className="eyebrow" style={{ color: "var(--green-400)" }}>My progress</div>
+          <div className="eyebrow" style={{ color: "var(--green-300)" }}>My progress</div>
           <h1 className="rk" style={{ fontSize: 34, color: "#f7f1e3", margin: "8px 0 16px" }}>🔥 5-day streak</h1>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
@@ -1007,14 +1015,14 @@ function ProgressPage({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v:
           </div>
         </div>
       </PageHead>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "44px 28px 70px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "44px 28px 70px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: 24 }}>
         <div className="card" style={{ padding: "28px 30px" }}>
           <h2 className="rk" style={{ fontSize: 20, color: "var(--ink-dark)", margin: "0 0 18px" }}>Surah progress</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {surahs.map((s) => (
               <div key={s.name}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontWeight: 800, fontSize: 14, color: "var(--ink-dark)" }}>{s.name} <span className="ar" style={{ color: "var(--gold-600)" }}>{s.ar}</span></span>
+                  <span style={{ fontWeight: 800, fontSize: 14, color: "var(--ink-dark)" }}>{s.name} <span className="ar" style={{ color: "var(--gold-ink)" }}>{s.ar}</span></span>
                   <span className="mut" style={{ fontSize: 12 }}>{s.label}</span>
                 </div>
                 <div className="bar-thin"><div className={s.pct === 100 ? "bar-green" : "bar-fill"} style={{ width: `${s.pct}%` }} /></div>
@@ -1029,7 +1037,7 @@ function ProgressPage({ nav, profile, lang, onToggleLang, onLogout }: { nav: (v:
               <div key={name}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                   <span style={{ fontWeight: 800, fontSize: 14, color: "var(--ink-dark)" }}>{name} <span className="ar" style={{ color: "var(--green-500)" }}>{ar}</span></span>
-                  <span className="rk" style={{ fontWeight: 700, fontSize: 13, color: pct < 55 ? "var(--gold-800)" : "var(--green-500)" }}>{pct}%{pct < 55 ? " · focus" : ""}</span>
+                  <span className="rk" style={{ fontWeight: 700, fontSize: 13, color: pct < 55 ? "var(--gold-ink)" : "var(--green-500)" }}>{pct}%{pct < 55 ? " · focus" : ""}</span>
                 </div>
                 <div className="bar-thin"><div className={pct < 55 ? "bar-fill" : "bar-green"} style={{ width: `${pct}%` }} /></div>
               </div>
@@ -1132,9 +1140,9 @@ function ChallengePage({ nav }: { nav: (v: View) => void }) {
             <span className="rk" style={{ fontSize: 16, fontWeight: 700, color: "#f7f1e3" }}>🔥 Your streak — day 8</span>
             <span style={{ fontSize: 12, color: "rgba(247,241,227,.55)", fontWeight: 700 }}>1 streak freeze available ❄️</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(38px, 1fr))", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(38px, 100%), 1fr))", gap: 8 }}>
             {days.map((n) => (
-              <div key={n} style={{ aspectRatio: "1", borderRadius: 8, background: n <= 8 ? "var(--gold-grad)" : n === 9 ? "rgba(212,169,74,.2)" : "transparent", border: n <= 8 ? "none" : n === 9 ? "1px dashed var(--gold-500)" : "1px solid rgba(212,169,74,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: n <= 8 ? "var(--green-950)" : "rgba(247,241,227,.4)" }}>{n}</div>
+              <div key={n} style={{ aspectRatio: "1", borderRadius: 8, background: n <= 8 ? "var(--gold-grad)" : n === 9 ? "rgba(212,169,74,.2)" : "transparent", border: n <= 8 ? "none" : n === 9 ? "1px dashed var(--gold-500)" : "1px solid rgba(212,169,74,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: n <= 8 ? "var(--green-950)" : "rgba(247,241,227,.75)" }}>{n}</div>
             ))}
           </div>
         </div>
@@ -1161,10 +1169,10 @@ function SharePage({ nav, share }: { nav: (v: View) => void; share: { score: num
         <div style={{ fontSize: 46, marginBottom: 12 }}>🎉</div>
         <div className="eyebrow">Share your win</div>
         <h1 className="rk" style={{ fontSize: 28, color: "#f7f1e3", margin: "8px 0 8px" }}>Masha'Allah — {score}%!</h1>
-        <p className="mut" style={{ fontSize: 14, marginBottom: 24 }}>You nailed {label || "your ayah"}.</p>
+        <p style={{ fontSize: 14, marginBottom: 24, color: "rgba(247,241,227,.78)" }}>You nailed {label || "your ayah"}.</p>
         <div className="glass-card" style={{ borderRadius: 16, padding: "20px", marginBottom: 24 }}>
           <div className="ar" style={{ fontSize: 26, color: "var(--gold-300)", direction: "rtl" }}>{verse}</div>
-          <div className="mut" style={{ fontSize: 12, marginTop: 8 }}>tilawah.me · Recite for the Ummah</div>
+          <div style={{ fontSize: 12, marginTop: 8, color: "rgba(247,241,227,.78)" }}>tilawah.me · Recite for the Ummah</div>
         </div>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <button className="btn btn-md btn-gold" onClick={() => nav("learn")}>📋 Copy card</button>

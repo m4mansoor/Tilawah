@@ -107,7 +107,7 @@ export default function AboutPage({ nav }: { nav: (v: View) => void }) {
           Whether you're a Qari looking to perfect your recitation, a Hafidh maintaining your hifdh, or a beginner taking
           your first steps with the Quran — Tilawah is designed for you.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(230px, 100%), 1fr))", gap: 16 }}>
           {FEATURES.map((f) => (
             <div key={f.title} className="glass-card" style={{ borderRadius: 16, padding: "24px 22px" }}>
               <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>

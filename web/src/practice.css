@@ -4,7 +4,10 @@
    Design tokens + components. Consumes theme.css variables.
    ===================================================================== */
 
-.pf {
+/* NOTE: these custom properties must land on the element that actually renders
+   (.pf-root). Defining them on a bare `.pf` that nothing uses leaves every
+   var() below undefined, which silently drops all colours back to the body ink. */
+.pf, .pf-root {
   --pf-surface: rgba(247, 241, 227, 0.045);
   --pf-surface-2: rgba(247, 241, 227, 0.08);
   --pf-border: rgba(143, 212, 180, 0.18);
@@ -150,6 +153,12 @@
   color: var(--pf-text);
   margin: 0;
 }
+/* shown during the recite/record steps — the reciter needs the words in front of
+   them, but smaller so the mic and timer stay above the fold */
+.pf-ayah-card-compact { padding: clamp(16px, 3.5vw, 22px); }
+.pf-ayah-card-compact .pf-ayah { font-size: clamp(21px, 5.2vw, 30px); line-height: 1.85; }
+.pf-ayah-card-compact .pf-ayah-ref { margin-top: 10px; font-size: 12px; }
+
 .pf-ayah-ref {
   margin-top: 14px;
   font-size: 13px;
@@ -158,6 +167,17 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+/* Arabic is cursive — letter-spacing breaks the joins and uppercase does nothing,
+   so the surah name opts out of both and uses the Arabic face. */
+.pf-ayah-ref-ar {
+  font-family: var(--pf-font-arabic);
+  font-size: 1.5em;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  vertical-align: -0.12em;
+  margin-inline-end: 2px;
 }
 
 /* audio player */
@@ -251,7 +271,7 @@
 .pf-btn:focus-visible { outline: 2px solid var(--pf-mint-strong); outline-offset: 3px; }
 .pf-btn-primary {
   background: var(--green-grad);
-  color: #06201a;
+  color: #f7f1e3;
   flex: 1 1 200px;
   box-shadow: 0 12px 30px rgba(24, 122, 94, 0.35);
 }
@@ -295,7 +315,7 @@
   cursor: pointer;
   position: relative;
   background: var(--green-grad);
-  color: #06201a;
+  color: #f7f1e3;
   display: inline-flex;
   align-items: center;
   justify-content: center;

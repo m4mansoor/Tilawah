@@ -287,7 +287,7 @@ export default function PracticeFlow({
 
             <div className="pf-ayah-card">
               <p className="pf-ayah">{ayahText || "…"}</p>
-              <div className="pf-ayah-ref">{surahName || `Surah ${surah}`} · Ayah {ayah?.ayah ?? 1}</div>
+              <div className="pf-ayah-ref"><span className="pf-ayah-ref-ar">{surahName || `Surah ${surah}`}</span> · Ayah {ayah?.ayah ?? 1}</div>
             </div>
 
             <div className="pf-player">
@@ -320,6 +320,12 @@ export default function PracticeFlow({
         {stage === "ready" && (
           <div className="pf-container">
             <p className="pf-eyebrow">Step 2 · Repeat</p>
+
+            <div className="pf-ayah-card pf-ayah-card-compact">
+              <p className="pf-ayah">{ayahText || "…"}</p>
+              <div className="pf-ayah-ref"><span className="pf-ayah-ref-ar">{surahName || `Surah ${surah}`}</span> · Ayah {ayah?.ayah ?? 1}</div>
+            </div>
+
             <div className="pf-wave is-idle" aria-hidden="true">
               {IDLE_LEVELS.map((v, i) => <span key={i} className="pf-wave-bar" style={{ height: `${v * 100}%` }} />)}
             </div>
@@ -337,6 +343,12 @@ export default function PracticeFlow({
         {stage === "recording" && (
           <div className="pf-container">
             <p className="pf-eyebrow">Step 2 · Repeat</p>
+
+            <div className="pf-ayah-card pf-ayah-card-compact">
+              <p className="pf-ayah">{ayahText || "…"}</p>
+              <div className="pf-ayah-ref"><span className="pf-ayah-ref-ar">{surahName || `Surah ${surah}`}</span> · Ayah {ayah?.ayah ?? 1}</div>
+            </div>
+
             <div className="pf-wave" aria-hidden="true">
               {levels.map((v, i) => <span key={i} className="pf-wave-bar" style={{ height: `${v * 100}%` }} />)}
             </div>
